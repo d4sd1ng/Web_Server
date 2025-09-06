@@ -14,13 +14,36 @@ from typing import Dict, Any
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from orchestrator.trading_orchestrator import TradingOrchestrator
+
+# ICT/SMC Agents
 from agents.ict_smc.fair_value_gaps_agent import FairValueGapsAgent
 from agents.ict_smc.order_blocks_agent import OrderBlocksAgent
 from agents.ict_smc.market_structure_agent import MarketStructureAgent
 from agents.ict_smc.liquidity_sweeps_agent import LiquiditySweepsAgent
 from agents.ict_smc.premium_discount_agent import PremiumDiscountAgent
 from agents.ict_smc.ote_agent import OTEAgent
+from agents.ict_smc.breaker_blocks_agent import BreakerBlocksAgent
+from agents.ict_smc.sof_agent import SOFAgent
+from agents.ict_smc.displacement_agent import DisplacementAgent
+from agents.ict_smc.engulfing_agent import EngulfingAgent
+from agents.ict_smc.mitigation_blocks_agent import MitigationBlocksAgent
+from agents.ict_smc.killzone_agent import KillzoneAgent
+from agents.ict_smc.pattern_cluster_agent import PatternClusterAgent
+from agents.ict_smc.swing_failure_pattern_agent import SwingFailurePatternAgent
+from agents.ict_smc.htf_confluence_agent import HTFConfluenceAgent
+
+# Analysis Agents
+from agents.analysis.volume_analysis_agent import VolumeAnalysisAgent
+from agents.analysis.session_analysis_agent import SessionAnalysisAgent
+
+# Data Agents
+from agents.data.sentiment_agent import SentimentAgent
+
+# ML Agents
 from agents.ml.ml_prediction_agent import MLPredictionAgent
+
+# Execution Agents
+from agents.execution.risk_management_agent import RiskManagementAgent
 
 
 class TradingSystem:
@@ -152,25 +175,63 @@ class TradingSystem:
         """Initialize all trading agents"""
         agent_configs = self.config.get('agents', {})
         agent_weights = self.config.get('agent_weights', {})
+        market_type = self.config.get('market_type', 'crypto')
+        
+        print(f"🤖 Initializing agents for {market_type} market...")
         
         # Initialize ICT/SMC agents
-        self.agents['fair_value_gaps'] = FairValueGapsAgent(agent_configs.get('fair_value_gaps', {}))
-        self.agents['order_blocks'] = OrderBlocksAgent(agent_configs.get('order_blocks', {}))
-        self.agents['market_structure'] = MarketStructureAgent(agent_configs.get('market_structure', {}))
-        self.agents['liquidity_sweeps'] = LiquiditySweepsAgent(agent_configs.get('liquidity_sweeps', {}))
-        self.agents['premium_discount'] = PremiumDiscountAgent(agent_configs.get('premium_discount', {}))
-        self.agents['ote'] = OTEAgent(agent_configs.get('ote', {}))
+        self.agents['fair_value_gaps'] = FairValueGapsAgent({**agent_configs.get('fair_value_gaps', {}), 'market_type': market_type})
+        self.agents['order_blocks'] = OrderBlocksAgent({**agent_configs.get('order_blocks', {}), 'market_type': market_type})
+        self.agents['market_structure'] = MarketStructureAgent({**agent_configs.get('market_structure', {}), 'market_type': market_type})
+        self.agents['liquidity_sweeps'] = LiquiditySweepsAgent({**agent_configs.get('liquidity_sweeps', {}), 'market_type': market_type})
+        self.agents['premium_discount'] = PremiumDiscountAgent({**agent_configs.get('premium_discount', {}), 'market_type': market_type})
+        self.agents['ote'] = OTEAgent({**agent_configs.get('ote', {}), 'market_type': market_type})
+        self.agents['breaker_blocks'] = BreakerBlocksAgent({**agent_configs.get('breaker_blocks', {}), 'market_type': market_type})
+        self.agents['sof'] = SOFAgent({**agent_configs.get('sof', {}), 'market_type': market_type})
+        self.agents['displacement'] = DisplacementAgent({**agent_configs.get('displacement', {}), 'market_type': market_type})
+        self.agents['engulfing'] = EngulfingAgent({**agent_configs.get('engulfing', {}), 'market_type': market_type})
+        self.agents['mitigation_blocks'] = MitigationBlocksAgent({**agent_configs.get('mitigation_blocks', {}), 'market_type': market_type})
+        self.agents['killzone'] = KillzoneAgent({**agent_configs.get('killzone', {}), 'market_type': market_type})
+        self.agents['pattern_cluster'] = PatternClusterAgent({**agent_configs.get('pattern_cluster', {}), 'market_type': market_type})
+        self.agents['swing_failure_pattern'] = SwingFailurePatternAgent({**agent_configs.get('swing_failure_pattern', {}), 'market_type': market_type})
+        self.agents['htf_confluence'] = HTFConfluenceAgent({**agent_configs.get('htf_confluence', {}), 'market_type': market_type})
+        
+        # Initialize Analysis agents
+        self.agents['volume_analysis'] = VolumeAnalysisAgent({**agent_configs.get('volume_analysis', {}), 'market_type': market_type})
+        self.agents['session_analysis'] = SessionAnalysisAgent({**agent_configs.get('session_analysis', {}), 'market_type': market_type})
+        
+        # Initialize Data agents
+        self.agents['sentiment'] = SentimentAgent({**agent_configs.get('sentiment', {}), 'market_type': market_type})
         
         # Initialize ML agents
         self.agents['ml_prediction'] = MLPredictionAgent(agent_configs.get('ml_prediction', {}))
+        
+        # Initialize Execution agents
+        self.agents['risk_management'] = RiskManagementAgent({**agent_configs.get('risk_management', {}), 'market_type': market_type})
         
         # Add agents to orchestrator
         for agent_id, agent in self.agents.items():
             weight = agent_weights.get(agent_id, 1.0)
             self.orchestrator.add_agent(agent, weight)
         
-        print(f"Initialized {len(self.agents)} agents:")
-        for agent_id in self.agents.keys():
+        print(f"✅ Initialized {len(self.agents)} agents:")
+        print("🎯 ICT/SMC Agents:")
+        for agent_id in ['fair_value_gaps', 'order_blocks', 'market_structure', 'liquidity_sweeps', 
+                        'premium_discount', 'ote', 'breaker_blocks', 'sof', 'displacement', 
+                        'engulfing', 'mitigation_blocks', 'killzone', 'pattern_cluster', 
+                        'swing_failure_pattern', 'htf_confluence']:
+            print(f"  • {agent_id}")
+        
+        print("📊 Analysis Agents:")
+        for agent_id in ['volume_analysis', 'session_analysis']:
+            print(f"  • {agent_id}")
+        
+        print("🤖 Data & ML Agents:")
+        for agent_id in ['sentiment', 'ml_prediction']:
+            print(f"  • {agent_id}")
+        
+        print("⚡ Execution Agents:")
+        for agent_id in ['risk_management']:
             print(f"  • {agent_id}")
     
     def start(self):
@@ -275,12 +336,17 @@ def main():
     parser.add_argument('--config', type=str, help='Path to configuration file')
     parser.add_argument('--mode', choices=['test', 'live', 'demo'], default='test', help='Trading mode')
     parser.add_argument('--symbol', type=str, default='BTC/USDT', help='Trading symbol')
+    parser.add_argument('--market-type', choices=['forex', 'crypto'], default='crypto', help='Market type (forex or crypto)')
     parser.add_argument('--status', action='store_true', help='Show system status and exit')
     
     args = parser.parse_args()
     
-    # Initialize trading system
+    # Initialize trading system with market type
+    config_override = {'market_type': args.market_type}
     trading_system = TradingSystem(args.config)
+    
+    # Override market type from command line
+    trading_system.config['market_type'] = args.market_type
     
     if args.status:
         # Just show status and exit
