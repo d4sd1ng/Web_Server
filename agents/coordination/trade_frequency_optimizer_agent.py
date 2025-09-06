@@ -20,10 +20,11 @@ class TradeFrequencyOptimizerAgent(BaseAgent):
     def __init__(self, config: Dict[str, Any] = None):
         super().__init__("trade_frequency_optimizer", config)
         
-        # Trade frequency configuration
-        self.min_trades_per_day = config.get('min_trades_per_day', 2)  # Minimum viable frequency
-        self.max_trades_per_day = config.get('max_trades_per_day', 10) # Maximum for quality
-        self.target_trades_per_week = config.get('target_trades_per_week', 15)
+        # Trade frequency configuration for intensive testing
+        self.min_trades_per_day = config.get('min_trades_per_day', 5)   # Higher for intensive testing
+        self.max_trades_per_day = config.get('max_trades_per_day', 50)  # Much higher for backtesting
+        self.target_trades_per_week = config.get('target_trades_per_week', 100) # Intensive testing target
+        self.testnet_mode = config.get('testnet_mode', False)  # Special mode for testnet
         self.frequency_monitoring_window = config.get('frequency_monitoring_window', 7)  # days
         
         # Dynamic adjustment parameters
@@ -74,14 +75,28 @@ class TradeFrequencyOptimizerAgent(BaseAgent):
     
     def apply_market_specific_config(self):
         """Apply market-specific frequency optimization"""
+        if self.testnet_mode:
+            # TESTNET MODE: Much higher frequency for intensive testing
+            self.min_trades_per_day = max(self.min_trades_per_day, 10)  # 10+ trades/day for testing
+            self.max_trades_per_day = max(self.max_trades_per_day, 100) # Up to 100 trades/day
+            self.target_trades_per_week = max(self.target_trades_per_week, 200) # 200+ trades/week
+            self.logger.info("TESTNET MODE: High-frequency trading enabled for intensive testing")
+        
         if self.market_type == 'forex':
-            # Forex: Session-based frequency expectations
-            self.min_trades_per_day = max(self.min_trades_per_day, 1)  # At least 1 per day
+            # Forex: Session-based but higher frequency for testing
+            if self.testnet_mode:
+                self.min_trades_per_day = max(self.min_trades_per_day, 8)  # 8+ per day
+            else:
+                self.min_trades_per_day = max(self.min_trades_per_day, 3)  # 3+ per day
             self.session_based_frequency = True
-            self.news_pause_periods = True
+            self.news_pause_periods = not self.testnet_mode  # Disable news pauses in testnet
+            
         elif self.market_type == 'crypto':
-            # Crypto: 24/7 trading allows higher frequency
-            self.min_trades_per_day = max(self.min_trades_per_day, 2)  # At least 2 per day
+            # Crypto: 24/7 trading allows very high frequency
+            if self.testnet_mode:
+                self.min_trades_per_day = max(self.min_trades_per_day, 15) # 15+ per day
+            else:
+                self.min_trades_per_day = max(self.min_trades_per_day, 5)  # 5+ per day
             self.session_based_frequency = False
             self.volatility_based_frequency = True
     
