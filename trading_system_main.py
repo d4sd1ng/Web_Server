@@ -35,15 +35,27 @@ from agents.ict_smc.htf_confluence_agent import HTFConfluenceAgent
 # Analysis Agents
 from agents.analysis.volume_analysis_agent import VolumeAnalysisAgent
 from agents.analysis.session_analysis_agent import SessionAnalysisAgent
+from agents.analysis.technical_indicators_agent import TechnicalIndicatorsAgent
 
 # Data Agents
 from agents.data.sentiment_agent import SentimentAgent
+from agents.data.historical_data_agent import HistoricalDataAgent
+from agents.data.market_data_agent import MarketDataAgent
 
 # ML Agents
 from agents.ml.ml_prediction_agent import MLPredictionAgent
 
 # Execution Agents
 from agents.execution.risk_management_agent import RiskManagementAgent
+from agents.execution.order_execution_agent import OrderExecutionAgent
+
+# Additional ICT/SMC Agents
+from agents.ict_smc.judas_swing_agent import JudasSwingAgent
+from agents.ict_smc.power_of_three_agent import PowerOfThreeAgent
+from agents.ict_smc.market_maker_model_agent import MarketMakerModelAgent
+from agents.ict_smc.turtle_soup_agent import TurtleSoupAgent
+from agents.ict_smc.imbalance_agent import ImbalanceAgent
+from agents.ict_smc.momentum_shift_agent import MomentumShiftAgent
 
 
 class TradingSystem:
@@ -196,18 +208,30 @@ class TradingSystem:
         self.agents['swing_failure_pattern'] = SwingFailurePatternAgent({**agent_configs.get('swing_failure_pattern', {}), 'market_type': market_type})
         self.agents['htf_confluence'] = HTFConfluenceAgent({**agent_configs.get('htf_confluence', {}), 'market_type': market_type})
         
+        # Initialize additional ICT/SMC agents
+        self.agents['judas_swing'] = JudasSwingAgent({**agent_configs.get('judas_swing', {}), 'market_type': market_type})
+        self.agents['power_of_three'] = PowerOfThreeAgent({**agent_configs.get('power_of_three', {}), 'market_type': market_type})
+        self.agents['market_maker_model'] = MarketMakerModelAgent({**agent_configs.get('market_maker_model', {}), 'market_type': market_type})
+        self.agents['turtle_soup'] = TurtleSoupAgent({**agent_configs.get('turtle_soup', {}), 'market_type': market_type})
+        self.agents['imbalance'] = ImbalanceAgent({**agent_configs.get('imbalance', {}), 'market_type': market_type})
+        self.agents['momentum_shift'] = MomentumShiftAgent({**agent_configs.get('momentum_shift', {}), 'market_type': market_type})
+        
         # Initialize Analysis agents
         self.agents['volume_analysis'] = VolumeAnalysisAgent({**agent_configs.get('volume_analysis', {}), 'market_type': market_type})
         self.agents['session_analysis'] = SessionAnalysisAgent({**agent_configs.get('session_analysis', {}), 'market_type': market_type})
+        self.agents['technical_indicators'] = TechnicalIndicatorsAgent({**agent_configs.get('technical_indicators', {}), 'market_type': market_type})
         
         # Initialize Data agents
         self.agents['sentiment'] = SentimentAgent({**agent_configs.get('sentiment', {}), 'market_type': market_type})
+        self.agents['historical_data'] = HistoricalDataAgent({**agent_configs.get('historical_data', {}), 'market_type': market_type})
+        self.agents['market_data'] = MarketDataAgent({**agent_configs.get('market_data', {}), 'market_type': market_type})
         
         # Initialize ML agents
         self.agents['ml_prediction'] = MLPredictionAgent(agent_configs.get('ml_prediction', {}))
         
         # Initialize Execution agents
         self.agents['risk_management'] = RiskManagementAgent({**agent_configs.get('risk_management', {}), 'market_type': market_type})
+        self.agents['order_execution'] = OrderExecutionAgent({**agent_configs.get('order_execution', {}), 'market_type': market_type})
         
         # Add agents to orchestrator
         for agent_id, agent in self.agents.items():
@@ -215,23 +239,27 @@ class TradingSystem:
             self.orchestrator.add_agent(agent, weight)
         
         print(f"✅ Initialized {len(self.agents)} agents:")
-        print("🎯 ICT/SMC Agents:")
+        print("🎯 Core ICT/SMC Agents:")
         for agent_id in ['fair_value_gaps', 'order_blocks', 'market_structure', 'liquidity_sweeps', 
                         'premium_discount', 'ote', 'breaker_blocks', 'sof', 'displacement', 
-                        'engulfing', 'mitigation_blocks', 'killzone', 'pattern_cluster', 
-                        'swing_failure_pattern', 'htf_confluence']:
+                        'engulfing', 'mitigation_blocks', 'killzone']:
+            print(f"  • {agent_id}")
+        
+        print("🔥 Advanced ICT/SMC Agents:")
+        for agent_id in ['pattern_cluster', 'swing_failure_pattern', 'htf_confluence', 'judas_swing', 
+                        'power_of_three', 'market_maker_model', 'turtle_soup', 'imbalance', 'momentum_shift']:
             print(f"  • {agent_id}")
         
         print("📊 Analysis Agents:")
-        for agent_id in ['volume_analysis', 'session_analysis']:
+        for agent_id in ['volume_analysis', 'session_analysis', 'technical_indicators']:
             print(f"  • {agent_id}")
         
         print("🤖 Data & ML Agents:")
-        for agent_id in ['sentiment', 'ml_prediction']:
+        for agent_id in ['sentiment', 'historical_data', 'market_data', 'ml_prediction']:
             print(f"  • {agent_id}")
         
         print("⚡ Execution Agents:")
-        for agent_id in ['risk_management']:
+        for agent_id in ['risk_management', 'order_execution']:
             print(f"  • {agent_id}")
     
     def start(self):
