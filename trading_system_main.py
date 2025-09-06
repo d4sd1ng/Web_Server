@@ -70,6 +70,17 @@ from agents.coordination.master_coordinator_agent import MasterCoordinatorAgent
 
 # Advanced Execution Agents
 from agents.execution.exit_strategy_agent import ExitStrategyAgent
+from agents.execution.advanced_entry_timing_agent import AdvancedEntryTimingAgent
+
+# System Management Agents
+from agents.system.error_recovery_agent import ErrorRecoveryAgent
+
+# Testing Agents
+from agents.testing.backtesting_agent import BacktestingAgent
+
+# Advanced Coordination Agents
+from agents.coordination.trade_frequency_optimizer_agent import TradeFrequencyOptimizerAgent
+from agents.coordination.dynamic_parameter_optimizer_agent import DynamicParameterOptimizerAgent
 
 
 class TradingSystem:
@@ -249,11 +260,20 @@ class TradingSystem:
         self.agents['confluence_coordinator'] = ConfluenceCoordinatorAgent({**agent_configs.get('confluence_coordinator', {}), 'market_type': market_type})
         self.agents['performance_feedback'] = PerformanceFeedbackAgent({**agent_configs.get('performance_feedback', {}), 'market_type': market_type})
         self.agents['master_coordinator'] = MasterCoordinatorAgent({**agent_configs.get('master_coordinator', {}), 'market_type': market_type})
+        self.agents['trade_frequency_optimizer'] = TradeFrequencyOptimizerAgent({**agent_configs.get('trade_frequency_optimizer', {}), 'market_type': market_type, 'testnet_mode': True})
+        self.agents['dynamic_parameter_optimizer'] = DynamicParameterOptimizerAgent({**agent_configs.get('dynamic_parameter_optimizer', {}), 'market_type': market_type})
+        
+        # Initialize System Management agents
+        self.agents['error_recovery'] = ErrorRecoveryAgent({**agent_configs.get('error_recovery', {}), 'market_type': market_type})
+        
+        # Initialize Testing agents
+        self.agents['backtesting'] = BacktestingAgent({**agent_configs.get('backtesting', {}), 'market_type': market_type})
         
         # Initialize Execution agents
         self.agents['risk_management'] = RiskManagementAgent({**agent_configs.get('risk_management', {}), 'market_type': market_type})
         self.agents['order_execution'] = OrderExecutionAgent({**agent_configs.get('order_execution', {}), 'market_type': market_type})
         self.agents['exit_strategy'] = ExitStrategyAgent({**agent_configs.get('exit_strategy', {}), 'market_type': market_type})
+        self.agents['advanced_entry_timing'] = AdvancedEntryTimingAgent({**agent_configs.get('advanced_entry_timing', {}), 'market_type': market_type})
         
         # Add agents to orchestrator
         for agent_id, agent in self.agents.items():
@@ -281,11 +301,20 @@ class TradingSystem:
             print(f"  • {agent_id}")
         
         print("🎯 Coordination Agents (>90% Win Rate):")
-        for agent_id in ['confluence_coordinator', 'performance_feedback', 'master_coordinator']:
+        for agent_id in ['confluence_coordinator', 'performance_feedback', 'master_coordinator', 
+                        'trade_frequency_optimizer', 'dynamic_parameter_optimizer']:
+            print(f"  • {agent_id}")
+        
+        print("🛠️ System Management Agents:")
+        for agent_id in ['error_recovery']:
+            print(f"  • {agent_id}")
+        
+        print("🧪 Testing Agents:")
+        for agent_id in ['backtesting']:
             print(f"  • {agent_id}")
         
         print("⚡ Execution Agents:")
-        for agent_id in ['risk_management', 'order_execution', 'exit_strategy']:
+        for agent_id in ['risk_management', 'order_execution', 'exit_strategy', 'advanced_entry_timing']:
             print(f"  • {agent_id}")
     
     def start(self):
