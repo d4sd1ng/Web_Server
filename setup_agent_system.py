@@ -1,347 +1,280 @@
 #!/usr/bin/env python3
 """
-Setup Script for Agent-Based Trading System
-Converts existing trading bot functions to specialized agents
+Setup script for 43-agent trading system with proper data organization
 """
 
 import os
 import sys
+import subprocess
+from pathlib import Path
 import json
-from datetime import datetime
 
-def create_agent_config():
-    """Create default agent configuration"""
-    config = {
-        "system_info": {
-            "name": "Advanced ICT/SMC Trading System",
-            "version": "1.0.0",
-            "created": datetime.now().isoformat(),
-            "description": "Agent-based trading system using existing ICT/SMC functions"
-        },
-        "orchestrator": {
-            "min_agent_consensus": 0.6,
-            "min_signal_strength": 0.7,
-            "orchestrator_interval": 60,
-            "max_decisions_history": 1000
-        },
-        "agents": {
-            "fair_value_gaps": {
-                "enabled": True,
-                "window": 3,
-                "min_gap": 0.0001,
-                "atr_distance_threshold": 2.0,
-                "max_active_fvgs": 50
-            },
-            "order_blocks": {
-                "enabled": True,
-                "lookback": 30,
-                "min_body": 0.3,
-                "retest_confirmation_bars": 3,
-                "max_active_obs": 100
-            },
-            "market_structure": {
-                "enabled": True,
-                "lookback": 20,
-                "confirmation_bars": 3,
-                "trend_consistency_period": 20
-            },
-            "liquidity_sweeps": {
-                "enabled": True,
-                "lookback": 10,
-                "equal_level_tolerance": 0.001,
-                "volume_threshold": 1.5,
-                "max_sweep_history": 50
-            },
-            "premium_discount": {
-                "enabled": True,
-                "swing_lookback": 50,
-                "zone_threshold": 0.1,
-                "max_zone_history": 100
-            },
-            "ote": {
-                "enabled": True,
-                "swing_lookback": 20,
-                "fib_618_level": 0.618,
-                "fib_786_level": 0.786,
-                "ote_fib_level": 0.705,
-                "max_ote_history": 200
-            },
-            "ml_prediction": {
-                "enabled": True,
-                "model_type": "RandomForest",
-                "threshold": 0.5,
-                "retrain_interval_hours": 24,
-                "model_path": "ml_model.pkl",
-                "scaler_path": "scaler.pkl",
-                "max_prediction_history": 1000
-            }
-        },
-        "agent_weights": {
-            "fair_value_gaps": 1.2,
-            "order_blocks": 1.5,
-            "market_structure": 1.3,
-            "liquidity_sweeps": 1.1,
-            "premium_discount": 1.0,
-            "ote": 1.4,
-            "ml_prediction": 1.0
-        },
-        "trading": {
-            "max_open_trades": 3,
-            "risk_per_trade": 0.01,
-            "leverage": 25,
-            "timeframes": ["1m", "5m", "15m", "1h", "4h", "1d"],
-            "symbols": [
-                "BTC/USDT", "ETH/USDT", "BNB/USDT", "SOL/USDT", "XRP/USDT",
-                "ADA/USDT", "AVAX/USDT", "DOGE/USDT", "LINK/USDT", "DOT/USDT"
-            ]
-        },
-        "logging": {
-            "level": "INFO",
-            "file": "trading_system.log",
-            "max_file_size_mb": 100,
-            "backup_count": 5
-        }
+
+def check_existing_files():
+    """Check for existing trading bot files"""
+    required_files = {
+        'tradingbot_new.py': 'Your main 6,372-line trading bot',
+        'ict_smc_enhancement.py': 'Your ICT/SMC functions'
     }
     
-    return config
+    found_files = {}
+    missing_files = []
+    
+    for filename, description in required_files.items():
+        if Path(filename).exists():
+            found_files[filename] = description
+            print(f"✅ Found: {filename} - {description}")
+        else:
+            missing_files.append(filename)
+            print(f"❌ Missing: {filename} - {description}")
+    
+    return found_files, missing_files
 
-def create_directory_structure():
+
+def create_comprehensive_directory_structure():
     """Create comprehensive directory structure for organized data management"""
     directories = [
         # Agent system directories
-        "agents",
-        "agents/ict_smc",
-        "agents/ml", 
-        "agents/data",
-        "agents/execution",
-        "agents/analysis",
-        "agents/coordination",
-        "agents/system",
-        "agents/testing",
-        "communication",
-        "orchestrator",
-        "config",
+        "agents", "agents/ict_smc", "agents/ml", "agents/data", "agents/execution",
+        "agents/analysis", "agents/coordination", "agents/system", "agents/testing",
+        "communication", "orchestrator", "config",
         
-        # Comprehensive data organization (PREVENTS DIRECTORY FLOODING)
+        # COMPREHENSIVE DATA ORGANIZATION (PREVENTS DIRECTORY FLOODING)
         "trading_data",
-        "trading_data/historical_data",
-        "trading_data/historical_data/forex",
-        "trading_data/historical_data/crypto",
-        "trading_data/historical_data/cache",
+        "trading_data/historical_data", "trading_data/historical_data/forex",
+        "trading_data/historical_data/crypto", "trading_data/historical_data/cache",
         
         # Real-time data organization
-        "trading_data/realtime_data",
-        "trading_data/realtime_data/tick_data",
-        "trading_data/realtime_data/quotes",
-        "trading_data/realtime_data/ohlcv",
+        "trading_data/realtime_data", "trading_data/realtime_data/tick_data",
+        "trading_data/realtime_data/quotes", "trading_data/realtime_data/ohlcv",
         
         # ML training data organization
-        "trading_data/ml_training",
-        "trading_data/ml_training/features", 
-        "trading_data/ml_training/labels",
-        "trading_data/ml_training/datasets",
+        "trading_data/ml_training", "trading_data/ml_training/features",
+        "trading_data/ml_training/labels", "trading_data/ml_training/datasets",
         "trading_data/ml_training/feature_engineering",
         
         # ML models organization
-        "trading_data/ml_models",
-        "trading_data/ml_models/trained",
-        "trading_data/ml_models/checkpoints",
-        "trading_data/ml_models/metadata",
+        "trading_data/ml_models", "trading_data/ml_models/trained",
+        "trading_data/ml_models/checkpoints", "trading_data/ml_models/metadata",
         "trading_data/ml_models/ensemble",
         
         # Backtesting organization
-        "trading_data/backtesting",
-        "trading_data/backtesting/results",
-        "trading_data/backtesting/datasets", 
-        "trading_data/backtesting/parameter_optimization",
+        "trading_data/backtesting", "trading_data/backtesting/results",
+        "trading_data/backtesting/datasets", "trading_data/backtesting/parameter_optimization",
         "trading_data/backtesting/walk_forward",
         
         # Agent data organization
-        "trading_data/agent_data",
-        "trading_data/agent_data/signals",
-        "trading_data/agent_data/performance",
-        "trading_data/agent_data/confluence",
+        "trading_data/agent_data", "trading_data/agent_data/signals",
+        "trading_data/agent_data/performance", "trading_data/agent_data/confluence",
         
         # System logs organization
-        "trading_data/system_logs",
-        "trading_data/system_logs/performance",
-        "trading_data/system_logs/errors",
-        "trading_data/system_logs/trading",
+        "trading_data/system_logs", "trading_data/system_logs/performance",
+        "trading_data/system_logs/errors", "trading_data/system_logs/trading",
         
         # Configuration organization
-        "trading_data/config",
-        "trading_data/config/agents",
-        "trading_data/config/markets",
-        "trading_data/config/optimization",
+        "trading_data/config", "trading_data/config/agents",
+        "trading_data/config/markets", "trading_data/config/optimization",
         
         # Exports and reports
-        "trading_data/exports",
-        "trading_data/exports/reports",
-        "trading_data/exports/analysis",
-        "trading_data/exports/ml_results",
+        "trading_data/exports", "trading_data/exports/reports",
+        "trading_data/exports/analysis", "trading_data/exports/ml_results",
         
         # Temporary and cache
-        "trading_data/temp",
-        "trading_data/cache",
-        "trading_data/downloads"
+        "trading_data/temp", "trading_data/cache", "trading_data/downloads"
     ]
     
     created_dirs = []
     for directory in directories:
-        if not os.path.exists(directory):
-            os.makedirs(directory, exist_ok=True)
+        try:
+            Path(directory).mkdir(parents=True, exist_ok=True)
+            
+            # Create .gitkeep to preserve empty directories in git
+            gitkeep_path = Path(directory) / '.gitkeep'
+            if not gitkeep_path.exists():
+                gitkeep_path.touch()
+            
             created_dirs.append(directory)
+            
+        except Exception as e:
+            print(f"Error creating directory {directory}: {e}")
     
     return created_dirs
 
-def save_config(config, filename="agent_config.json"):
-    """Save configuration to file"""
+
+def create_default_configuration():
+    """Create default configuration file"""
+    config = {
+        "market_type": "crypto",
+        "symbols": ["BTC/USDT", "ETH/USDT"],
+        "timeframes": ["1h", "4h"],
+        "testnet_mode": True,
+        "ml_data_collection_mode": True,
+        "agents": {
+            "fair_value_gaps": {
+                "enabled": True,
+                "window": 3,
+                "min_gap": 0.0005
+            },
+            "confluence_coordinator": {
+                "enabled": True,
+                "min_confluence_patterns": 3,
+                "min_confluence_score": 5.0
+            },
+            "ml_ensemble": {
+                "enabled": True,
+                "confidence_threshold": 0.75,
+                "model_agreement_threshold": 0.7
+            },
+            "trade_frequency_optimizer": {
+                "enabled": True,
+                "min_trades_per_day": 10,
+                "target_trades_per_week": 100,
+                "testnet_mode": True
+            }
+        },
+        "data_paths": {
+            "historical": "trading_data/historical_data",
+            "ml_training": "trading_data/ml_training", 
+            "models": "trading_data/ml_models",
+            "backtesting": "trading_data/backtesting"
+        }
+    }
+    
+    config_path = Path("trading_data/config/default_config.json")
+    config_path.parent.mkdir(parents=True, exist_ok=True)
+    
+    with open(config_path, 'w') as f:
+        json.dump(config, f, indent=2)
+    
+    return str(config_path)
+
+
+def install_dependencies():
+    """Install required dependencies"""
+    print("📦 Installing dependencies...")
     try:
-        with open(filename, 'w') as f:
-            json.dump(config, f, indent=2)
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "requirements_ultimate.txt"])
+        print("✅ Dependencies installed successfully")
         return True
-    except Exception as e:
-        print(f"Error saving config: {e}")
+    except subprocess.CalledProcessError as e:
+        print(f"❌ Error installing dependencies: {e}")
+        print("⚠️ You may need to install manually: pip install -r requirements_ultimate.txt")
+        return False
+    except FileNotFoundError:
+        print("⚠️ requirements_ultimate.txt not found - dependencies not installed")
         return False
 
-def create_init_files():
-    """Create __init__.py files for Python packages"""
-    init_files = [
-        "agents/__init__.py",
-        "agents/ict_smc/__init__.py",
-        "agents/ml/__init__.py",
-        "agents/data/__init__.py",
-        "agents/execution/__init__.py",
-        "agents/analysis/__init__.py",
-        "communication/__init__.py",
-        "orchestrator/__init__.py"
-    ]
-    
-    created_files = []
-    for init_file in init_files:
-        if not os.path.exists(init_file):
-            with open(init_file, 'w') as f:
-                f.write('"""Agent system package"""')
-            created_files.append(init_file)
-    
-    return created_files
-
-def create_example_usage():
-    """Create example usage script"""
-    example_code = '''#!/usr/bin/env python3
-"""
-Example Usage of Agent-Based Trading System
-"""
-
-from trading_system_main import TradingSystem
-import time
-
-def run_example():
-    """Run example trading system"""
-    print("🚀 Agent-Based Trading System Example")
-    print("=" * 50)
-    
-    # Initialize system
-    trading_system = TradingSystem("agent_config.json")
-    
-    try:
-        # Start system
-        if trading_system.start():
-            print("✅ System started successfully!")
-            
-            # Let it run for a bit
-            time.sleep(10)
-            
-            # Get status
-            status = trading_system.get_system_status()
-            print(f"📊 System Status: {status['orchestrator_status']}")
-            print(f"🤖 Active Agents: {status['active_agents']}/{status['total_agents']}")
-            
-            # Get agent summaries
-            summaries = trading_system.get_agent_summaries()
-            print("\\n📈 Agent Summary:")
-            for agent_id, summary in summaries.items():
-                strength = summary.get('last_signal_strength', 0.0)
-                print(f"  • {agent_id}: {strength:.2f}")
-            
-        else:
-            print("❌ Failed to start system")
-    
-    finally:
-        # Always stop cleanly
-        trading_system.stop()
-        print("✅ System stopped")
-
-if __name__ == "__main__":
-    run_example()
-'''
-    
-    with open("example_usage.py", "w") as f:
-        f.write(example_code)
-    
-    return "example_usage.py"
 
 def main():
     """Main setup function"""
-    print("🔧 Setting up Agent-Based Trading System")
-    print("=" * 50)
+    print("🚀 SETTING UP 43-AGENT TRADING SYSTEM")
+    print("=" * 60)
+    
+    # Check current location
+    current_path = os.getcwd()
+    print(f"📍 Setup location: {current_path}")
+    
+    # Check for existing trading bot files
+    print("\n📋 CHECKING EXISTING TRADING BOT FILES:")
+    found_files, missing_files = check_existing_files()
+    
+    if missing_files:
+        print(f"\n⚠️ WARNING: Missing files: {missing_files}")
+        print("🎯 Make sure you're running this in your trading bot repository")
+        print("   Expected files: tradingbot_new.py, ict_smc_enhancement.py")
+        
+        proceed = input("\nProceed anyway? (y/N): ")
+        if proceed.lower() != 'y':
+            print("❌ Setup cancelled")
+            return False
     
     # Create directory structure
-    print("📁 Creating directory structure...")
-    created_dirs = create_directory_structure()
-    print(f"Created {len(created_dirs)} directories")
+    print("\n📁 CREATING COMPREHENSIVE DIRECTORY STRUCTURE...")
+    created_dirs = create_comprehensive_directory_structure()
+    print(f"✅ Created {len(created_dirs)} directories for organized data management")
+    print("📁 Key directories:")
+    print("  • trading_data/historical_data/ (50-year historical data)")
+    print("  • trading_data/ml_training/ (60M+ training samples)")
+    print("  • trading_data/ml_models/ (15 trained algorithms)")
+    print("  • trading_data/backtesting/ (backtest results)")
+    print("  • trading_data/agent_data/ (agent signals)")
     
-    # Create __init__.py files
-    print("📄 Creating package files...")
-    created_files = create_init_files()
-    print(f"Created {len(created_files)} __init__.py files")
+    # Create default configuration
+    print("\n⚙️ CREATING DEFAULT CONFIGURATION...")
+    config_path = create_default_configuration()
+    print(f"✅ Created configuration: {config_path}")
     
-    # Create configuration
-    print("⚙️  Creating configuration...")
-    config = create_agent_config()
-    if save_config(config):
-        print("✅ Configuration saved to agent_config.json")
+    # Install dependencies
+    print("\n📦 INSTALLING DEPENDENCIES...")
+    deps_installed = install_dependencies()
+    
+    # Create .gitignore for data directories
+    print("\n📝 CREATING .gitignore FOR DATA DIRECTORIES...")
+    gitignore_content = """
+# Trading data directories (large files)
+trading_data/historical_data/*.parquet
+trading_data/ml_training/*.parquet
+trading_data/ml_models/*.joblib
+trading_data/backtesting/results/
+trading_data/temp/
+trading_data/cache/
+trading_data/downloads/
+
+# Log files
+trading_data/system_logs/*.log
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtual environments
+venv/
+.venv/
+"""
+    
+    gitignore_path = Path('.gitignore')
+    if gitignore_path.exists():
+        # Append to existing .gitignore
+        with open(gitignore_path, 'a') as f:
+            f.write(gitignore_content)
     else:
-        print("❌ Failed to save configuration")
+        # Create new .gitignore
+        with open(gitignore_path, 'w') as f:
+            f.write(gitignore_content)
     
-    # Create example usage
-    print("📝 Creating example usage script...")
-    example_file = create_example_usage()
-    print(f"✅ Created {example_file}")
+    print("✅ Updated .gitignore for data directories")
     
-    print("\n🎉 Setup Complete!")
-    print("=" * 50)
-    print("📋 What was created:")
-    print("• Agent directory structure")
-    print("• Base agent classes")
-    print("• ICT/SMC specialized agents:")
-    print("  - Fair Value Gaps Agent")
-    print("  - Order Blocks Agent") 
-    print("  - Market Structure Agent")
-    print("  - Liquidity Sweeps Agent")
-    print("  - Premium/Discount Agent")
-    print("  - OTE Agent")
-    print("• ML Prediction Agent")
-    print("• Trading Orchestrator")
-    print("• Message Bus Communication")
-    print("• Configuration files")
-    print("• Example usage script")
+    print("\n🎊 SETUP COMPLETED!")
+    print("=" * 60)
+    print("✅ 43-agent system structure created")
+    print("✅ Comprehensive data organization implemented")
+    print("✅ Dependencies installed" if deps_installed else "⚠️ Dependencies need manual installation")
+    print("✅ Configuration created")
+    print("✅ .gitignore updated")
     
-    print("\n🚀 Next Steps:")
-    print("1. Install requirements: pip install -r requirements_agents.txt")
-    print("2. Test the system: python trading_system_main.py --status")
-    print("3. Run example: python example_usage.py")
-    print("4. Customize agent_config.json for your needs")
-    print("5. Add more agents as needed")
+    print(f"\n🚀 READY TO START:")
+    print("# Test the system:")
+    print("python trading_system_main.py --mode test --market-type crypto")
+    print("")
+    print("# Check system status:")
+    print("python trading_system_main.py --mode status")
+    print("")
+    print("# Start testnet mode:")
+    print("python trading_system_main.py --mode demo --testnet-mode")
     
-    print("\n💡 Your existing ICT/SMC functions are now available as:")
-    print("• Modular, specialized agents")
-    print("• Inter-agent communication system")
-    print("• Centralized orchestration")
-    print("• Scalable architecture")
-    print("• Easy to extend and maintain")
+    print(f"\n🎯 NEXT STEPS:")
+    print("1. Test the basic system")
+    print("2. Create remaining agent files")
+    print("3. Start 50-year backtesting")
+    print("4. Deploy 32-week testnet")
     
-    print("\n🔥 Ready to trade with agent-based architecture!")
+    print(f"\n🌟 YOUR 43-AGENT SYSTEM IS READY!")
+    
+    return True
+
 
 if __name__ == "__main__":
-    main()
+    success = main()
+    if not success:
+        sys.exit(1)

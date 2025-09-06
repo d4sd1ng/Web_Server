@@ -1,5 +1,5 @@
-# Ultimate Trading System Requirements - >90% Win Rate
-# Complete dependencies for 36-agent trading system
+# Ultimate Trading System Requirements - 43 Agents with 15 ML Algorithms
+# Complete dependencies for maximum ML data collection
 
 # Core Data Processing
 pandas>=1.5.0
@@ -9,14 +9,12 @@ pytz>=2022.1
 
 # Market Data & APIs
 ccxt>=2.0.0
-newsdataapi>=0.1.0
-yfinance>=0.1.87
+requests>=2.28.0
 
 # Technical Analysis
 ta>=0.10.2
-TA-Lib>=0.4.24
 
-# Machine Learning - Complete Ensemble (12 Algorithms)
+# Machine Learning - Complete Ensemble (15 Algorithms)
 scikit-learn>=1.1.0
 xgboost>=1.6.0
 lightgbm>=3.3.0
@@ -24,81 +22,25 @@ catboost>=1.1.0
 
 # Neural Networks & Deep Learning
 tensorflow>=2.10.0
-keras>=2.10.0
 torch>=1.12.0
 
 # Additional ML Libraries
 joblib>=1.2.0
-shap>=0.41.0
 
 # Statistical Analysis
 scipy>=1.9.0
-statsmodels>=0.13.0
 
 # Performance & Optimization
 optuna>=3.0.0
-hyperopt>=0.2.7
-
-# Data Visualization (Optional)
-matplotlib>=3.5.0
-plotly>=5.10.0
-seaborn>=0.11.0
 
 # Utilities & Tools
 tqdm>=4.64.0
-schedule>=1.1.0
-requests>=2.28.0
-
-# Development & Testing
-pytest>=7.1.0
-pytest-asyncio>=0.19.0
-black>=22.0.0
-flake8>=5.0.0
-
-# Logging & Monitoring
-structlog>=22.1.0
-prometheus-client>=0.14.0
-
-# Configuration Management
-pydantic>=1.10.0
-click>=8.1.0
 
 # Async & Concurrency
-asyncio
 aiohttp>=3.8.0
-uvloop>=0.17.0
-
-# Database (Optional for trade storage)
-sqlalchemy>=1.4.0
-sqlite3
-
-# API Security
-cryptography>=37.0.0
-pyjwt>=2.4.0
 
 # Memory Optimization
 psutil>=5.9.0
-memory-profiler>=0.60.0
-
-# Time Series Analysis
-arch>=5.3.0
-pmdarima>=2.0.0
-
-# Financial Calculations
-quantlib>=1.29.0
-
-# WebSocket for Real-time Data
-websocket-client>=1.4.0
-websockets>=10.3
-
-# Message Queue (Optional)
-redis>=4.3.0
-celery>=5.2.0
 
 # Configuration Files
-toml>=0.10.0
-yaml>=6.0
-
-# Progress Bars & UI
-rich>=12.5.0
-typer>=0.6.0
+pydantic>=1.10.0
