@@ -10,7 +10,7 @@ import json
 import time
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Dict, Any, List
+# Remove typing imports to avoid issues
 import sys
 import os
 
@@ -636,7 +636,7 @@ class Enhanced43AgentGUI:
             self.agents_count_label.config(text="Agents: 0/43")
             self.status_bar.config(text="🔴 System Stopped | 0 Agents Active | Ready to Start")
     
-    def update_agent_status_display(self, test_results: dict):
+    def update_agent_status_display(self, test_results):
         """Update agent status in the GUI"""
         for agent_id, result in test_results.items():
             if agent_id in self.agent_status_vars:
