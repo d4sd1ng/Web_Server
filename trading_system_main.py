@@ -57,6 +57,20 @@ from agents.ict_smc.turtle_soup_agent import TurtleSoupAgent
 from agents.ict_smc.imbalance_agent import ImbalanceAgent
 from agents.ict_smc.momentum_shift_agent import MomentumShiftAgent
 
+# Advanced Analysis Agents
+from agents.analysis.market_regime_agent import MarketRegimeAgent
+
+# Advanced ML Agents  
+from agents.ml.ml_ensemble_agent import MLEnsembleAgent
+
+# Coordination Agents
+from agents.coordination.confluence_coordinator_agent import ConfluenceCoordinatorAgent
+from agents.coordination.performance_feedback_agent import PerformanceFeedbackAgent
+from agents.coordination.master_coordinator_agent import MasterCoordinatorAgent
+
+# Advanced Execution Agents
+from agents.execution.exit_strategy_agent import ExitStrategyAgent
+
 
 class TradingSystem:
     """
@@ -220,6 +234,7 @@ class TradingSystem:
         self.agents['volume_analysis'] = VolumeAnalysisAgent({**agent_configs.get('volume_analysis', {}), 'market_type': market_type})
         self.agents['session_analysis'] = SessionAnalysisAgent({**agent_configs.get('session_analysis', {}), 'market_type': market_type})
         self.agents['technical_indicators'] = TechnicalIndicatorsAgent({**agent_configs.get('technical_indicators', {}), 'market_type': market_type})
+        self.agents['market_regime'] = MarketRegimeAgent({**agent_configs.get('market_regime', {}), 'market_type': market_type})
         
         # Initialize Data agents
         self.agents['sentiment'] = SentimentAgent({**agent_configs.get('sentiment', {}), 'market_type': market_type})
@@ -228,10 +243,17 @@ class TradingSystem:
         
         # Initialize ML agents
         self.agents['ml_prediction'] = MLPredictionAgent(agent_configs.get('ml_prediction', {}))
+        self.agents['ml_ensemble'] = MLEnsembleAgent({**agent_configs.get('ml_ensemble', {}), 'market_type': market_type})
+        
+        # Initialize Coordination agents (CRITICAL for >90% win rate)
+        self.agents['confluence_coordinator'] = ConfluenceCoordinatorAgent({**agent_configs.get('confluence_coordinator', {}), 'market_type': market_type})
+        self.agents['performance_feedback'] = PerformanceFeedbackAgent({**agent_configs.get('performance_feedback', {}), 'market_type': market_type})
+        self.agents['master_coordinator'] = MasterCoordinatorAgent({**agent_configs.get('master_coordinator', {}), 'market_type': market_type})
         
         # Initialize Execution agents
         self.agents['risk_management'] = RiskManagementAgent({**agent_configs.get('risk_management', {}), 'market_type': market_type})
         self.agents['order_execution'] = OrderExecutionAgent({**agent_configs.get('order_execution', {}), 'market_type': market_type})
+        self.agents['exit_strategy'] = ExitStrategyAgent({**agent_configs.get('exit_strategy', {}), 'market_type': market_type})
         
         # Add agents to orchestrator
         for agent_id, agent in self.agents.items():
@@ -251,15 +273,19 @@ class TradingSystem:
             print(f"  • {agent_id}")
         
         print("📊 Analysis Agents:")
-        for agent_id in ['volume_analysis', 'session_analysis', 'technical_indicators']:
+        for agent_id in ['volume_analysis', 'session_analysis', 'technical_indicators', 'market_regime']:
             print(f"  • {agent_id}")
         
         print("🤖 Data & ML Agents:")
-        for agent_id in ['sentiment', 'historical_data', 'market_data', 'ml_prediction']:
+        for agent_id in ['sentiment', 'historical_data', 'market_data', 'ml_prediction', 'ml_ensemble']:
+            print(f"  • {agent_id}")
+        
+        print("🎯 Coordination Agents (>90% Win Rate):")
+        for agent_id in ['confluence_coordinator', 'performance_feedback', 'master_coordinator']:
             print(f"  • {agent_id}")
         
         print("⚡ Execution Agents:")
-        for agent_id in ['risk_management', 'order_execution']:
+        for agent_id in ['risk_management', 'order_execution', 'exit_strategy']:
             print(f"  • {agent_id}")
     
     def start(self):
