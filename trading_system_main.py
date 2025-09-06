@@ -41,6 +41,7 @@ from agents.analysis.technical_indicators_agent import TechnicalIndicatorsAgent
 from agents.data.sentiment_agent import SentimentAgent
 from agents.data.historical_data_agent import HistoricalDataAgent
 from agents.data.market_data_agent import MarketDataAgent
+from agents.data.data_manager_agent import DataManagerAgent
 
 # ML Agents
 from agents.ml.ml_prediction_agent import MLPredictionAgent
@@ -251,6 +252,7 @@ class TradingSystem:
         self.agents['sentiment'] = SentimentAgent({**agent_configs.get('sentiment', {}), 'market_type': market_type})
         self.agents['historical_data'] = HistoricalDataAgent({**agent_configs.get('historical_data', {}), 'market_type': market_type})
         self.agents['market_data'] = MarketDataAgent({**agent_configs.get('market_data', {}), 'market_type': market_type})
+        self.agents['data_manager'] = DataManagerAgent({**agent_configs.get('data_manager', {}), 'market_type': market_type})
         
         # Initialize ML agents
         self.agents['ml_prediction'] = MLPredictionAgent(agent_configs.get('ml_prediction', {}))
@@ -297,7 +299,7 @@ class TradingSystem:
             print(f"  • {agent_id}")
         
         print("🤖 Data & ML Agents:")
-        for agent_id in ['sentiment', 'historical_data', 'market_data', 'ml_prediction', 'ml_ensemble']:
+        for agent_id in ['sentiment', 'historical_data', 'market_data', 'data_manager', 'ml_prediction', 'ml_ensemble']:
             print(f"  • {agent_id}")
         
         print("🎯 Coordination Agents (>90% Win Rate):")

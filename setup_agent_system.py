@@ -106,20 +106,84 @@ def create_agent_config():
     return config
 
 def create_directory_structure():
-    """Create directory structure for agent system"""
+    """Create comprehensive directory structure for organized data management"""
     directories = [
+        # Agent system directories
         "agents",
         "agents/ict_smc",
-        "agents/ml",
+        "agents/ml", 
         "agents/data",
         "agents/execution",
         "agents/analysis",
+        "agents/coordination",
+        "agents/system",
+        "agents/testing",
         "communication",
         "orchestrator",
         "config",
-        "logs",
-        "models",
-        "backtest_results"
+        
+        # Comprehensive data organization (PREVENTS DIRECTORY FLOODING)
+        "trading_data",
+        "trading_data/historical_data",
+        "trading_data/historical_data/forex",
+        "trading_data/historical_data/crypto",
+        "trading_data/historical_data/cache",
+        
+        # Real-time data organization
+        "trading_data/realtime_data",
+        "trading_data/realtime_data/tick_data",
+        "trading_data/realtime_data/quotes",
+        "trading_data/realtime_data/ohlcv",
+        
+        # ML training data organization
+        "trading_data/ml_training",
+        "trading_data/ml_training/features", 
+        "trading_data/ml_training/labels",
+        "trading_data/ml_training/datasets",
+        "trading_data/ml_training/feature_engineering",
+        
+        # ML models organization
+        "trading_data/ml_models",
+        "trading_data/ml_models/trained",
+        "trading_data/ml_models/checkpoints",
+        "trading_data/ml_models/metadata",
+        "trading_data/ml_models/ensemble",
+        
+        # Backtesting organization
+        "trading_data/backtesting",
+        "trading_data/backtesting/results",
+        "trading_data/backtesting/datasets", 
+        "trading_data/backtesting/parameter_optimization",
+        "trading_data/backtesting/walk_forward",
+        
+        # Agent data organization
+        "trading_data/agent_data",
+        "trading_data/agent_data/signals",
+        "trading_data/agent_data/performance",
+        "trading_data/agent_data/confluence",
+        
+        # System logs organization
+        "trading_data/system_logs",
+        "trading_data/system_logs/performance",
+        "trading_data/system_logs/errors",
+        "trading_data/system_logs/trading",
+        
+        # Configuration organization
+        "trading_data/config",
+        "trading_data/config/agents",
+        "trading_data/config/markets",
+        "trading_data/config/optimization",
+        
+        # Exports and reports
+        "trading_data/exports",
+        "trading_data/exports/reports",
+        "trading_data/exports/analysis",
+        "trading_data/exports/ml_results",
+        
+        # Temporary and cache
+        "trading_data/temp",
+        "trading_data/cache",
+        "trading_data/downloads"
     ]
     
     created_dirs = []
