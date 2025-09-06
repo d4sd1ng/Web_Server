@@ -20,11 +20,12 @@ class TradeFrequencyOptimizerAgent(BaseAgent):
     def __init__(self, config: Dict[str, Any] = None):
         super().__init__("trade_frequency_optimizer", config)
         
-        # Trade frequency configuration for intensive testing
-        self.min_trades_per_day = config.get('min_trades_per_day', 5)   # Higher for intensive testing
-        self.max_trades_per_day = config.get('max_trades_per_day', 50)  # Much higher for backtesting
-        self.target_trades_per_week = config.get('target_trades_per_week', 100) # Intensive testing target
+        # Trade frequency configuration for MAXIMUM ML data collection
+        self.min_trades_per_day = config.get('min_trades_per_day', 10)   # Much higher for ML data
+        self.max_trades_per_day = config.get('max_trades_per_day', 200)  # MAXIMUM for backtesting
+        self.target_trades_per_week = config.get('target_trades_per_week', 500) # MAXIMUM ML data collection
         self.testnet_mode = config.get('testnet_mode', False)  # Special mode for testnet
+        self.ml_data_collection_mode = config.get('ml_data_collection_mode', True)  # Maximum data mode
         self.frequency_monitoring_window = config.get('frequency_monitoring_window', 7)  # days
         
         # Dynamic adjustment parameters
@@ -75,12 +76,12 @@ class TradeFrequencyOptimizerAgent(BaseAgent):
     
     def apply_market_specific_config(self):
         """Apply market-specific frequency optimization"""
-        if self.testnet_mode:
-            # TESTNET MODE: Much higher frequency for intensive testing
-            self.min_trades_per_day = max(self.min_trades_per_day, 10)  # 10+ trades/day for testing
-            self.max_trades_per_day = max(self.max_trades_per_day, 100) # Up to 100 trades/day
-            self.target_trades_per_week = max(self.target_trades_per_week, 200) # 200+ trades/week
-            self.logger.info("TESTNET MODE: High-frequency trading enabled for intensive testing")
+        if self.testnet_mode or self.ml_data_collection_mode:
+            # MAXIMUM DATA COLLECTION MODE: Ultra-high frequency for ML training
+            self.min_trades_per_day = max(self.min_trades_per_day, 15)  # 15+ trades/day minimum
+            self.max_trades_per_day = max(self.max_trades_per_day, 200) # Up to 200 trades/day
+            self.target_trades_per_week = max(self.target_trades_per_week, 500) # 500+ trades/week
+            self.logger.info("MAXIMUM DATA COLLECTION MODE: Ultra-high frequency for ML training")
         
         if self.market_type == 'forex':
             # Forex: Session-based but higher frequency for testing
@@ -92,13 +93,15 @@ class TradeFrequencyOptimizerAgent(BaseAgent):
             self.news_pause_periods = not self.testnet_mode  # Disable news pauses in testnet
             
         elif self.market_type == 'crypto':
-            # Crypto: 24/7 trading allows very high frequency
-            if self.testnet_mode:
-                self.min_trades_per_day = max(self.min_trades_per_day, 15) # 15+ per day
+            # Crypto: 24/7 trading allows MAXIMUM frequency for ML data
+            if self.testnet_mode or self.ml_data_collection_mode:
+                self.min_trades_per_day = max(self.min_trades_per_day, 20) # 20+ per day for ML data
+                self.target_trades_per_day = 50  # Target 50 trades/day for maximum data
             else:
-                self.min_trades_per_day = max(self.min_trades_per_day, 5)  # 5+ per day
+                self.min_trades_per_day = max(self.min_trades_per_day, 8)  # 8+ per day normal
             self.session_based_frequency = False
             self.volatility_based_frequency = True
+            self.whale_activity_frequency = True  # Track whale patterns
     
     def process_data(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """

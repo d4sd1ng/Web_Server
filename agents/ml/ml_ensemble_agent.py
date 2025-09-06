@@ -46,20 +46,20 @@ class MLEnsembleAgent(BaseAgent):
         self.logger.info(f"ML Ensemble Agent initialized with {len(self.models_config)} algorithms")
     
     def load_all_models_config(self) -> Dict[str, Any]:
-        """Load configuration for ALL ML algorithms"""
+        """Load configuration for ALL 15 ML algorithms for maximum data collection"""
         return {
             'xgboost': {
                 'name': 'XGBoost',
                 'params': {
-                    'n_estimators': 200,
-                    'max_depth': 8,
-                    'learning_rate': 0.1,
+                    'n_estimators': 300,  # Increased for more data
+                    'max_depth': 10,      # Deeper for complex patterns
+                    'learning_rate': 0.08,
                     'subsample': 0.8,
                     'colsample_bytree': 0.8,
                     'random_state': 42,
                     'n_jobs': -1
                 },
-                'weight': 1.5  # High weight for strong performer
+                'weight': 1.8  # Higher weight for proven performer
             },
             'lightgbm': {
                 'name': 'LightGBM',
@@ -169,14 +169,43 @@ class MLEnsembleAgent(BaseAgent):
             'neural_network': {
                 'name': 'MLPClassifier',
                 'params': {
-                    'hidden_layer_sizes': (128, 64, 32),
+                    'hidden_layer_sizes': (256, 128, 64, 32),  # Deeper network
                     'activation': 'relu',
                     'solver': 'adam',
                     'alpha': 0.001,
                     'random_state': 42,
-                    'max_iter': 500
+                    'max_iter': 800  # More iterations
                 },
-                'weight': 1.0
+                'weight': 1.2
+            },
+            # ADDITIONAL ALGORITHMS FOR MAXIMUM DATA COLLECTION
+            'transformer': {
+                'name': 'TransformerClassifier',
+                'params': {
+                    'n_heads': 8,
+                    'n_layers': 6,
+                    'd_model': 128,
+                    'sequence_length': 100
+                },
+                'weight': 1.4
+            },
+            'cnn_lstm': {
+                'name': 'CNN_LSTM',
+                'params': {
+                    'cnn_filters': [64, 128, 256],
+                    'lstm_units': [128, 64],
+                    'sequence_length': 60,
+                    'epochs': 150
+                },
+                'weight': 1.3
+            },
+            'ensemble_voting': {
+                'name': 'VotingClassifier',
+                'params': {
+                    'voting': 'soft',
+                    'n_estimators_per_model': 100
+                },
+                'weight': 1.6  # High weight for ensemble of ensembles
             }
         }
     
