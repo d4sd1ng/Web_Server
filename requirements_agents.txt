@@ -1,0 +1,19 @@
+# ICT/SMC Trading Agents Requirements
+# Install with: pip install -r requirements_agents.txt
+
+# Core dependencies
+pandas>=1.5.0
+numpy>=1.20.0
+
+# For data handling and analysis
+typing_extensions>=4.0.0
+
+# Optional dependencies for enhanced functionality
+# These are only needed if you want to run full integration tests
+matplotlib>=3.5.0
+plotly>=5.0.0
+yfinance>=0.1.70
+
+# Development and testing (optional)
+pytest>=7.0.0
+pytest-cov>=4.0.0
