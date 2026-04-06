@@ -1,4 +1,6 @@
-# Secrets
+# =========================
+# Secrets / Sensitive Data
+# =========================
 .env
 .env.*
 *.key
@@ -7,31 +9,57 @@
 *.cert
 *.csr
 *.pfx
+*.p12
 
+# =========================
 # Logs
+# =========================
 *.log
 logs/
 **/logs/
 
-# Runtime / cache
+# =========================
+# Runtime / Cache
+# =========================
 tmp/
 cache/
 **/tmp/
 **/cache/
 
-# Docker persistent data
+# =========================
+# Docker Persistent Data
+# =========================
+
+# Postgres
 postgres/data/
 **/postgres/data/
+
+# Portainer
 portainer/data/
 **/portainer/data/
-adguard/work/
-**/adguard/work/
-adguard/conf/
-**/adguard/conf/
-letsencrypt/
-**/letsencrypt/
 
-# System / editor
+# AdGuard
+adguard/work/
+adguard/conf/
+**/adguard/work/
+**/adguard/conf/
+
+# Traefik Certificates
+traefik/letsencrypt/
+**/letsencrypt/
+*.json
+
+# Redis
+redis/data/
+**/redis/data/
+
+# Vaultwarden
+vaultwarden/data/
+**/vaultwarden/data/
+
+# =========================
+# System / Editor
+# =========================
 .DS_Store
 Thumbs.db
 *.swp
@@ -39,6 +67,15 @@ Thumbs.db
 .vscode/
 .idea/
 
-# Python
+# =========================
+# Python / Scripts
+# =========================
 __pycache__/
 *.pyc
+
+# =========================
+# Optional Backups
+# =========================
+*.bak
+*.old
+*.backup
