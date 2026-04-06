@@ -1,0 +1,14 @@
+http:
+  routers:
+    adguard:
+      rule: "Host(`adguard.internal.avataryx.de`)"
+      entryPoints:
+        - websecure
+      service: adguard-svc
+      tls: {}
+
+  services:
+    adguard-svc:
+      loadBalancer:
+        servers:
+          - url: "http://192.168.178.10:8081"

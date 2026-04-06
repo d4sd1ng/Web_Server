@@ -1,0 +1,22 @@
+<h1>🔄 Backup & Restore</h1>
+<h2>Verfügbare Backups</h2>
+<ul>
+    {% for backup in backups %}
+    <li>{{ backup.filename }} - {{ backup.date }}</li>
+    {% endfor %}
+</ul>
+<h2>Backup erstellen</h2>
+<form method="post" action="/backup/create">
+    <button type="submit">Jetzt Backup erstellen</button>
+</form>
+<h2>Backup wiederherstellen</h2>
+<form method="post" action="/backup/restore">
+    <label for="backup_file">Backup-Datei:</label>
+    <select id="backup_file" name="backup_file">
+        {% for backup in backups %}
+        <option value="{{ backup.filename }}">{{ backup.filename }}</option>
+        {% endfor %}
+    </select>
+    <button type="submit">Wiederherstellen</button>
+</form>
+<a href="/dashboard">Zurück zum Dashboard</a>

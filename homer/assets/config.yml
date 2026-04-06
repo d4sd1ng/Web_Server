@@ -1,0 +1,125 @@
+title: "avataryx.de Server Dashboard"
+subtitle: "Central Service Management Hub"
+
+header: true
+footer: '<p>Ì†ΩÌ¥ê Protected by <a href="https://auth.avataryx.de">Authelia SSO</a> | Ì†ΩÌ≥ä <a href="https://traefik.avataryx.de">Traefik</a></p>'
+
+theme: walkxcode
+colors:
+  dark:
+    highlight-primary: "#38bdf8"
+
+services:
+  - name: "Ì†ΩÌ≥ä System Management"
+    icon: "fas fa-cogs"
+    items:
+      - name: "Traefik Dashboard"
+        logo: "https://doc.traefik.io/traefik/assets/img/traefik.logo.png"
+        subtitle: "Reverse Proxy & SSL Management"
+        url: "https://traefik.mongojude.cc"
+        target: "_blank"
+        type: "Ping"
+
+      - name: "Portainer"
+        logo: "https://portainer.io/images/logos/portainer-logo-black.svg"
+        subtitle: "Docker Container Management"
+        url: "https://portainer.mongojude.cc"
+        target: "_blank"
+        type: "Ping"
+
+      - name: "Dockge"
+        logo: "https://raw.githubusercontent.com/louislam/dockge/master/frontend/public/icon.svg"
+        subtitle: "Docker Compose Stack Management"
+        url: "https://dockge.mongojude.cc"
+        target: "_blank"
+        type: "Ping"
+
+      - name: "Watchtower"
+        logo: "https://github.com/containrrr/watchtower/raw/main/logo.png"
+        subtitle: "Automatic Container Updates"
+        url: "https://updates.mongojude.cc"
+        target: "_blank"
+        type: "Ping"
+
+  - name: "Ì†ΩÌ≥Å File Management"
+    icon: "fas fa-folder"
+    items:
+      - name: "Files"
+        logo: "assets/filemanager.png"
+        subtitle: "Universal Storage Access (PC, NAS, USB)"
+        url: "https://files.mongojude.cc"
+        target: "_blank"
+        type: "Ping"
+
+      - name: "Nextcloud"
+        logo: "https://upload.wikimedia.org/wikipedia/commons/6/60/Nextcloud_Logo.svg"
+        subtitle: "Cloud Storage & Collaboration"
+        url: "https://cloud.mongojude.cc"
+        target: "_blank"
+        type: "Ping"
+
+  - name: "Ì†ΩÌ≥• Media & Downloads"
+    icon: "fas fa-download"
+    items:
+      - name: "Enhanced Downloader"
+        logo: "https://github.com/yt-dlp/yt-dlp/raw/master/devscripts/logo.png"
+        subtitle: "Smart Media Download with PostgreSQL"
+        url: "https://downloader.mongojude.cc"
+        target: "_blank"
+        type: "Ping"
+
+  - name: "Ì†ΩÌ¥ê Security & Database"
+    icon: "fas fa-shield-alt"
+    items:
+      - name: "Vaultwarden"
+        logo: "https://raw.githubusercontent.com/dani-garcia/vaultwarden/main/resources/vaultwarden-icon.png"
+        subtitle: "Password Manager (Bitwarden Compatible)"
+        url: "https://vault.mongojude.cc"
+        target: "_blank"
+        type: "Ping"
+
+      - name: "Authelia"
+        logo: "https://www.authelia.com/images/branding/logo-cropped.png"
+        subtitle: "Single Sign-On Authentication"
+        url: "https://auth.mongojude.cc"
+        target: "_blank"
+        type: "Ping"
+
+      - name: "Database Manager"
+        logo: "https://www.phpmyadmin.net/static/images/logo.png"
+        subtitle: "PostgreSQL Web Interface"
+        url: "https://db.mongojude.cc"
+        target: "_blank"
+        type: "Ping"
+
+  - name: "Ì†ΩÌ≥ä Monitoring & Logs"
+    icon: "fas fa-chart-line"
+    items:
+      - name: "System Monitoring"
+        logo: "https://www.netdata.cloud/img/netdata-logo.svg"
+        subtitle: "Real-time System Metrics"
+        url: "https://monitoring.mongojude.cc"
+        target: "_blank"
+        type: "Ping"
+
+      - name: "Service Uptime"
+        logo: "https://github.com/louislam/uptime-kuma/raw/master/public/icon.svg"
+        subtitle: "Service Status & Alerts"
+        url: "https://uptime.mongojude.cc"
+        target: "_blank"
+        type: "Ping"
+
+links:
+  - name: "Ì†ΩÌ≥ñ Documentation"
+    icon: "fas fa-book"
+    url: "#"
+    target: "_blank"
+  - name: "‚öôÔ∏è Settings"
+    icon: "fas fa-cog"
+    url: "#"
+    target: "_blank"
+
+message:
+  style: "is-success"
+  title: "Ì†ΩÌ∫Ä Production Server Status"
+  content: "All services running on Raspberry Pi with Cloudflare Tunnel protection and Authelia SSO. System automatically maintained with Watchtower updates."

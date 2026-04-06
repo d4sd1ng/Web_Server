@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Homeserver</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/css/styles.css" rel="stylesheet">
+    <link rel="icon" href="/static/images/favicon.ico" type="image/x-icon">
+</head>
+<body>
+<div class="container-fluid">
+    <header class="text-center" style="background-image: url('/static/images/header-bg.jpg'); background-size: cover; background-position: center; color: white; padding: 20px;">
+        <h1>Homeserver</h1>
+    </header>
+    <div class="row">
+        <nav class="col-md-3 col-lg-2 sidebar">
+            <ul class="nav flex-column">
+                <li class="nav-item"><a class="nav-link active" href="#welcome">Willkommen</a></li>
+                <li class="nav-item"><a class="nav-link" href="#settings">Einstellungen</a></li>
+                <li class="nav-item"><a class="nav-link" href="#backup-restore">Backup & Restore</a></li>
+                <li class="nav-item"><a class="nav-link" href="#update-services">System & Dienste Update</a></li>
+                <li class="nav-item"><a class="nav-link" href="#fail2ban">Fail2Ban</a></li>
+                <li class="nav-item"><a class="nav-link" href="#adguard">AdGuard</a></li>
+                <li class="nav-item"><a class="nav-link" href="#wireguard">WireGuard</a></li>
+                <li class="nav-item"><a class="nav-link" href="#samba">Samba</a></li>
+                <li class="nav-item"><a class="nav-link" href="#downloader">Downloader</a></li>
+                <li class="nav-item"><a class="nav-link" href="#grow-controller">Grow Controller</a></li>
+                <li class="nav-item"><a class="nav-link" href="#trading-bot">Trading Bot</a></li>
+                <li class="nav-item"><a class="nav-link" href="#klipper">3D Drucker/Klipper</a></li>
+                <li class="nav-item"><a class="nav-link" href="#databases">Datenbank</a></li>
+                <li class="nav-item"><a class="nav-link" href="#system">Systemmetriken</a></li>
+            </ul>
+        </nav>
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div id="welcome" class="content">
+                <h2>Willkommen</h2>
+                <p>Willkommen auf deinem Homeserver!</p>
+            </div>
+            <div id="settings" class="content" style="display: none;">
+                <h2>Einstellungen</h2>
+                <p>Systemeinstellungen</p>
+            </div>
+            <div id="backup-restore" class="content" style="display: none;">
+                <h2>Backup & Restore</h2>
+                <p>Backup & Restore-Verwaltung</p>
+            </div>
+            <div id="update-services" class="content" style="display: none;">
+                <h2>System & Dienste Update</h2>
+                <p>Update-Verwaltung</p>
+            </div>
+            <div id="fail2ban" class="content" style="display: none;">
+                <h2>Fail2Ban</h2>
+                <p>Fail2Ban-Konfigurationsseite</p>
+            </div>
+            <div id="adguard" class="content" style="display: none;">
+                <h2>AdGuard</h2>
+                <iframe src="http://192.168.1.6:8888" style="width: 100%; height: 80vh; border: none;" title="AdGuard Web Panel"></iframe>
+            </div>
+            <div id="wireguard" class="content" style="display: none;">
+                <h2>WireGuard</h2>
+                <p>WireGuard-Konfigurationsseite</p>
+            </div>
+            <div id="samba" class="content" style="display: none;">
+                <h2>Samba</h2>
+                <iframe src="/samba" style="width: 100%; height: 80vh; border: none;" title="Samba"></iframe>
+            </div>
+            <div id="downloader" class="content" style="display: none;">
+                <h2>Downloader</h2>
+                <iframe src="/downloader" style="width: 100%; height: 80vh; border: none;" title="Downloader"></iframe>
+            </div>
+            <div id="grow-controller" class="content" style="display: none;">
+                <h2>Grow Controller</h2>
+                <p>Grow Controller-Konfiguration</p>
+            </div>
+            <div id="trading-bot" class="content" style="display: none;">
+                <h2>Trading Bot</h2>
+                <p>Trading Bot-Verwaltung</p>
+            </div>
+            <div id="klipper" class="content" style="display: none;">
+                <h2>3D Drucker/Klipper</h2>
+                <p>Klipper-Verwaltung</p>
+            </div>
+            <div id="databases" class="content" style="display: none;">
+                <h2>Datenbank</h2>
+                <iframe src="/databases" style="width: 100%; height: 80vh; border: none;" title="Datenbank"></iframe>
+            </div>
+            <div id="system" class="content" style="display: none;">
+                <h2>Systemmetriken</h2>
+                <iframe src="http://192.168.1.6:19999" style="width: 100%; height: 80vh; border: none;" title="Netdata Dashboard"></iframe>
+            </div>
+        </main>
+    </div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const navLinks = document.querySelectorAll('.nav-link');
+        const contents = document.querySelectorAll('.content');
+        const header = document.querySelector('header');
+
+        console.log('Debug: Page Loaded.'); // Debug: Initiale Seite geladen
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href').substring(1);
+
+                console.log('Debug: Navigating to:', targetId); // Debug: Zielbereich
+                contents.forEach(content => {
+                    content.style.display = 'none';
+                });
+
+                document.getElementById(targetId).style.display = 'block';
+
+                // Zeige den Header nur auf der Willkommensseite
+                if (targetId === 'welcome') {
+                    header.style.display = 'block';
+                    console.log('Debug: Header visible'); // Debug: Header sichtbar
+                } else {
+                    header.style.display = 'none';
+                    console.log('Debug: Header hidden'); // Debug: Header ausgeblendet
+                }
+
+                navLinks.forEach(nav => nav.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        // Zeige standardmäßig die Willkommensseite und den Header
+        document.getElementById('welcome').style.display = 'block';
+        header.style.display = 'block';
+        console.log('Debug: Initial view - Welcome page and header.'); // Debug: Initialer Zustand
+    });
+</script>
+</body>
+</html>

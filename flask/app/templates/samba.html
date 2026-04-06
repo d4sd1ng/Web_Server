@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Samba-Einrichtung</title>
+</head>
+<body>
+    <h1>Samba-Einrichtung</h1>
+    <form action="{{ url_for('samba_bp.setup_samba') }}" method="post">
+        <button type="submit">Samba einrichten</button>
+    </form>
+    <a href="{{ url_for('dashboard') }}">Zurück zum Dashboard</a>
+</body>
+</html>

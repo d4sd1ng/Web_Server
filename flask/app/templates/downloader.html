@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Downloader</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #1e1e1e;
+            color: #c0c0c0;
+        }
+        .downloader-container {
+            padding: 20px;
+            background-color: #2e2e2e;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+        }
+        .form-label {
+            font-weight: bold;
+            color: #c0c0c0;
+        }
+        .form-control, .form-select {
+            background-color: #3e3e3e;
+            color: #e0e0e0;
+            border: 1px solid #555555;
+        }
+        .form-control:focus, .form-select:focus {
+            background-color: #3e3e3e;
+            color: #e0e0e0;
+            border-color: #777777;
+            box-shadow: 0 0 5px rgba(119, 119, 119, 0.5);
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+<div class="container downloader-container">
+    <form action="/downloader/download" method="post">
+        <div class="mb-3">
+            <label for="urls" class="form-label">URLs (eine pro Zeile):</label>
+            <textarea class="form-control" id="urls" name="urls" rows="4" required></textarea>
+        </div>
+        <div class="mb-3">
+            <label for="destination" class="form-label">Zielverzeichnis:</label>
+            <select class="form-select" id="destination" name="destination" required>
+                {% for directory in directories %}
+                    <option value="{{ directory }}">{{ directory }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Herunterladen</button>
+    </form>
+</div>
+</body>
+</html>

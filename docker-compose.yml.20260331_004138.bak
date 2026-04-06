@@ -1,0 +1,123 @@
+services:
+  traefik:
+    image: traefik:v3.6.2
+    container_name: traefik
+    restart: unless-stopped
+    environment:
+      - CF_DNS_API_TOKEN=cfat_Eq9y5qgnH1yAcTGG9YcGSoPLNmDeJZ70zy6njfpj8aa74ad8
+    networks:
+      - server
+    ports:
+      - "80:80"
+      - "443:443"
+    command:
+      - --api.dashboard=true
+      - --api.insecure=false
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --providers.file.directory=/dynamic
+      - --providers.file.watch=true
+      - --entrypoints.web.address=:80
+      - --entrypoints.websecure.address=:443
+      - --providers.docker.endpoint=unix:///var/run/docker.sock
+      - --certificatesresolvers.cloudflare.acme.email=d4sd1ng@gmx.de
+      - --certificatesresolvers.cloudflare.acme.storage=/letsencrypt/acme.json
+      - --certificatesresolvers.cloudflare.acme.dnschallenge=true
+      - --certificatesresolvers.cloudflare.acme.dnschallenge.provider=cloudflare
+      - --certificatesresolvers.cloudflare.acme.dnschallenge.delaybeforecheck=0
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+#     - /opt/server/traefik/traefik.yml:/traefik.yml:ro
+      - /opt/server/traefik/dynamic:/dynamic:ro
+#     - /opt/server/traefik/cert.pem:/certs/cert.pem:ro
+#     - /opt/server/traefik/key.pem:/certs/key.pem:ro
+      - /opt/server/traefik/letsencrypt:/letsencrypt
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.traefik.rule=Host(`traefik.internal.avataryx.de`)
+      - traefik.http.routers.traefik.entrypoints=websecure
+      - traefik.http.routers.traefik.tls=true
+      - traefik.http.routers.traefik.service=api@internal
+
+  adguard:
+    image: adguard/adguardhome:latest
+    container_name: adguard
+    restart: unless-stopped
+    network_mode: host
+    volumes:
+      - /opt/server/adguard/work:/opt/adguardhome/work
+      - /opt/server/adguard/conf:/opt/adguardhome/conf
+
+  homer:
+    image: b4bz/homer:latest
+    container_name: homer
+    restart: unless-stopped
+    networks:
+      - server
+    volumes:
+      - /opt/server/homer/assets:/www/assets
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.homer.rule=Host(`home.internal.avataryx.de`)
+      - traefik.http.routers.homer.entrypoints=websecure
+      - traefik.http.routers.homer.tls=true
+      - traefik.http.services.homer.loadbalancer.server.port=8080
+
+  vaultwarden:
+    image: vaultwarden/server:latest
+    container_name: vaultwarden
+    restart: unless-stopped
+    networks:
+      - server
+    volumes:
+      - /mnt/storage/vaultwarden:/data
+    environment:
+      DOMAIN: https://vault.internal.avataryx.de
+      SIGNUPS_ALLOWED: "false"
+      WEBSOCKET_ENABLED: "true"
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.vaultwarden.rule=Host(`vault.internal.avataryx.de`)
+      - traefik.http.routers.vaultwarden.entrypoints=websecure
+      - traefik.http.routers.vaultwarden.tls=true
+      - traefik.http.routers.vaultwarden.tls.certresolver=cloudflare
+      - traefik.http.services.vaultwarden.loadbalancer.server.port=80
+
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    restart: unless-stopped
+    networks:
+      - server
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /opt/server/portainer/data:/data
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.portainer.rule=Host(`portainer.internal.avataryx.de`)
+      - traefik.http.routers.portainer.entrypoints=websecure
+      - traefik.http.routers.portainer.tls=true
+      - traefik.http.services.portainer.loadbalancer.server.port=9000
+
+  postgres:
+    image: postgres:16
+    container_name: postgres
+    restart: unless-stopped
+    networks:
+      - server
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: CHANGE_ME_NOW
+      POSTGRES_DB: appdb
+    volumes:
+      - /mnt/storage/postgres:/var/lib/postgresql/data
+      - /opt/server/postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d appdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  server:
+    name: server

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔒 Fail2Ban Verwaltung</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav>
+        <h2>🔒 Fail2Ban Verwaltung</h2>
+        <a href="/dashboard">🏠 Dashboard</a>
+    </nav>
+    <div class="container">
+        <h1>Fail2Ban - Gesperrte IPs</h1>
+        <table id="ip-table">
+            <thead>
+                <tr>
+                    <th>Jail</th>
+                    <th>Gesperrte IPs</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td colspan="2">Lade Daten...</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>IP entsperren</h2>
+        <form id="unban-form">
+            <label for="ip">IP-Adresse:</label>
+            <input type="text" id="ip" name="ip" placeholder="192.168.1.100" required>
+            <label for="jail">Jail:</label>
+            <input type="text" id="jail" name="jail" placeholder="z.B. sshd" required>
+            <button type="button" onclick="unbanIp()">Entsperren</button>
+        </form>
+
+        <h2>Logs</h2>
+        <div id="log-container">
+            <ul id="log-list">
+                <li>Lade Logs...</li>
+            </ul>
+        </div>
+    </div>
+    <script>
+        async function fetchBannedIps() {
+            const response = await fetch('/fail2ban/ips');
+            const data = await response.json();
+            const ipTableBody = document.querySelector('#ip-table tbody');
+            ipTableBody.innerHTML = '';
+            if (data.banned_ips) {
+                for (const jail in data.banned_ips) {
+                    const ips = data.banned_ips[jail];
+                    const row = document.createElement('tr');
+                    const jailCell = document.createElement('td');
+                    jailCell.textContent = jail;
+                    const ipsCell = document.createElement('td');
+                    ipsCell.textContent = ips.length > 0 ? ips.join(', ') : 'Keine gesperrten IPs';
+                    row.appendChild(jailCell);
+                    row.appendChild(ipsCell);
+                    ipTableBody.appendChild(row);
+                }
+            } else {
+                ipTableBody.innerHTML = '<tr><td colspan="2">Keine gesperrten IPs gefunden.</td></tr>';
+            }
+        }
+
+        async function fetchLogs() {
+            const response = await fetch('/fail2ban/logs');
+            const data = await response.json();
+            const logList = document.getElementById('log-list');
+            logList.innerHTML = '';
+            if (data.logs) {
+                data.logs.forEach(log => {
+                    const logItem = document.createElement('li');
+                    logItem.textContent = log;
+                    logList.appendChild(logItem);
+                });
+            } else {
+                logList.innerHTML = '<li>Keine Logs verfügbar.</li>';
+            }
+        }
+
+        async function unbanIp() {
+            const formData = new FormData(document.getElementById('unban-form'));
+            const response = await fetch('/fail2ban/unban', {
+                method: 'POST',
+                body: formData
+            });
+            const result = await response.json();
+            if (response.ok) {
+                alert(result.message);
+                fetchBannedIps();
+            } else {
+                alert(result.error);
+            }
+        }
+
+        // Daten laden
+        fetchBannedIps();
+        fetchLogs();
+    </script>
+</body>
+</html>

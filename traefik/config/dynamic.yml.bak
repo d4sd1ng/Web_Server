@@ -1,0 +1,18 @@
+http:
+  routers:
+    dashboard:
+      rule: "Host(`traefik.avataryx.de`) || Host(`www.traefik.avataryx.de`)"
+      middlewares:
+        - authtraefik
+      service: api@internal
+      entryPoints:
+        - websecure
+      tls:
+        certResolver: cloudflare
+
+  middlewares:
+    authtraefik:
+      basicAuth:
+        users:
+          - "d4sd1ng:$2y$05$EJW4Afhcg08aTVio79MeKuArCi4WzgWsvQTeiks1xGHndBEkoL4UK"
+          - "admin:$2y$05$5T6YJwi9iWcnH2by46rvJeS.UZFIksDRoaS8VUisf71jC5lzFwtNm"

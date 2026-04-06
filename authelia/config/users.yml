@@ -1,0 +1,8 @@
+users:
+  admin:
+    displayname: Admin
+    password: "$argon2id$v=19$m=65536,t=3,p=4$Jc17GSk61VvzmokabTc22Q$IZmeX/vdgqdzt4gPWQtKi6s4cA/6/llHnQg0pVpqyY4"
+    email: admin@vpn.local
+    groups:
+      - admins
+      - users

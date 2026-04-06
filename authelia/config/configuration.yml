@@ -1,0 +1,45 @@
+host: 0.0.0.0
+port: 9091
+log_level: info
+jwt_secret: K7x9mP2wQ8bR5vN3gT6hY1eU4sL7nM0z
+default_redirection_url: https://home.vpn.local
+
+totp:
+  issuer: vpn.local
+  period: 30
+  skew: 1
+
+authentication_backend:
+  file:
+    path: /config/users.yml
+
+access_control:
+  default_policy: deny
+  rules:
+    - domain: "auth.vpn.local"
+      policy: bypass
+    - domain: "home.vpn.local"
+      policy: bypass
+    - domain: "*.vpn.local"
+      policy: one_factor
+
+session:
+  name: authelia_session
+  secret: X5dF8jH2kL9pW6qE3rT7yU1iO4aN8bC0
+  expiration: 3600
+  inactivity: 300
+  domain: vpn.local
+
+regulation:
+  max_retries: 5
+  find_time: 2m
+  ban_time: 5m
+
+storage:
+  encryption_key: B3gT6hY9mP2wQ5vN8eU1rT4yL7nM0zX5
+  local:
+    path: /config/db.sqlite3
+
+notifier:
+  filesystem:
+    filename: /config/notification.txt
