@@ -1,19 +1,44 @@
-# Docker
-**/data/
-**/logs/
-**/tmp/
-
-# Volumes
-**/postgres/
-**/portainer/
-**/adguard/work/
-**/adguard/conf/
-
 # Secrets
 .env
+.env.*
 *.key
 *.pem
 *.crt
+*.cert
+*.csr
+*.pfx
 
-# System
+# Logs
 *.log
+logs/
+**/logs/
+
+# Runtime / cache
+tmp/
+cache/
+**/tmp/
+**/cache/
+
+# Docker persistent data
+postgres/data/
+**/postgres/data/
+portainer/data/
+**/portainer/data/
+adguard/work/
+**/adguard/work/
+adguard/conf/
+**/adguard/conf/
+letsencrypt/
+**/letsencrypt/
+
+# System / editor
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.vscode/
+.idea/
+
+# Python
+__pycache__/
+*.pyc
