@@ -1,0 +1,1962 @@
+<!DOCTYPE html>
+<html lang="de" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Homeserver</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/css/styles.css?v=2" rel="stylesheet">
+    <link rel="icon" href="/static/images/favicon.ico" type="image/x-icon">
+</head>
+<body>
+<div class="container-fluid">
+    <header class="text-center py-3">
+        <h1 class="d-flex align-items-center justify-content-center gap-3">
+            <img src="/static/images/hkreuzx.png" alt="" style="height:38px;">
+            Homeserver
+            <img src="/static/images/hkreuzx.png" alt="" style="height:38px;">
+        </h1>
+    </header>
+    <div class="row">
+        <nav class="col-md-3 col-lg-2 sidebar">
+            <ul class="nav flex-column">
+                <li class="nav-item"><a class="nav-link active" href="#welcome">Willkommen</a></li>
+                {% if role == 'admin' %}<li class="nav-item"><a class="nav-link" href="#settings">Einstellungen</a></li>{% endif %}
+                <li class="nav-item"><a class="nav-link" href="#backup-restore">Backup & Restore</a></li>
+                <li class="nav-item"><a class="nav-link" href="#update-services">System & Dienste Update</a></li>
+                <li class="nav-item"><a class="nav-link" href="#fail2ban">Fail2Ban</a></li>
+                <li class="nav-item"><a class="nav-link" href="#adguard">AdGuard</a></li>
+                <li class="nav-item"><a class="nav-link" href="#wireguard">WireGuard</a></li>
+                <li class="nav-item"><a class="nav-link" href="#filemanager">Filemanager</a></li>
+                <li class="nav-item"><a class="nav-link" href="#downloader">Downloader</a></li>
+                <li class="nav-item"><a class="nav-link" href="#grow-controller">Grow Controller</a></li>
+                <li class="nav-item"><a class="nav-link" href="#trading-bot">Trading Bot</a></li>
+                <li class="nav-item"><a class="nav-link" href="#klipper">3D Drucker/Klipper</a></li>
+                <li class="nav-item"><a class="nav-link" href="#databases">Datenbank</a></li>
+                <li class="nav-item"><a class="nav-link" href="#system">Systemmetriken</a></li>
+                <li class="nav-item"><a class="nav-link" href="#portainer">Portainer</a></li>
+                <li class="nav-item"><a class="nav-link" href="#homer-tab">Homer</a></li>
+                <li class="nav-item"><a class="nav-link" href="#kuma-tab">Uptime Kuma</a></li>
+                <li class="nav-item"><a class="nav-link" href="#traefik-tab">Traefik</a></li>
+                <li class="nav-item"><a class="nav-link" href="#vaultwarden-tab">Vaultwarden</a></li>
+                <li class="nav-item"><a class="nav-link" href="#nextcloud-tab">Nextcloud</a></li>
+            </ul>
+        </nav>
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div id="welcome" class="content">
+                <!-- Alerts -->
+                <div id="alertBox" class="mb-3"></div>
+
+                <!-- News -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">Crypto News</h5>
+                                <ul id="cryptoNews" class="list-unstyled small">
+                                    <li class="text-muted">Lädt…</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">KI News</h5>
+                                <ul id="aiNews" class="list-unstyled small">
+                                    <li class="text-muted">Lädt…</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <footer class="d-flex justify-content-between align-items-center pt-3 mt-3"
+                        style="border-top: 1px solid #2a4a2a; font-size: 0.85rem; color: #8a9a8a;">
+                    <span>© d4sd1ng &nbsp;|&nbsp; <span id="footerClock"></span></span>
+                    <span>CPU: <span id="footerTemp">—</span></span>
+                </footer>
+            </div>
+            {% if role == 'admin' %}
+            <div id="settings" class="content" style="display: none;">
+                <h2>Einstellungen</h2>
+
+                <!-- System Info -->
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">Systeminfo</h5>
+                                <table class="table table-sm mb-0" id="sysinfo-table">
+                                    <tbody>
+                                        <tr><td class="text-muted" style="width:40%">Hostname</td><td id="si-hostname">—</td></tr>
+                                        <tr><td class="text-muted">IP-Adresse</td><td id="si-ip">—</td></tr>
+                                        <tr><td class="text-muted">Uptime</td><td id="si-uptime">—</td></tr>
+                                        <tr><td class="text-muted">Betriebssystem</td><td id="si-os" style="font-size:0.8rem">—</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">Ressourcen</h5>
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between small mb-1">
+                                        <span class="text-muted">CPU-Temperatur</span>
+                                        <span id="si-temp">—</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between small mb-1">
+                                        <span class="text-muted">RAM</span>
+                                        <span id="si-mem">—</span>
+                                    </div>
+                                    <div class="progress mb-1" style="height:6px">
+                                        <div id="si-mem-bar" class="progress-bar bg-success" style="width:0%"></div>
+                                    </div>
+                                    <div class="d-flex justify-content-between small mb-1 mt-2">
+                                        <span class="text-muted">Festplatte (/)</span>
+                                        <span id="si-disk">—</span>
+                                    </div>
+                                    <div class="progress" style="height:6px">
+                                        <div id="si-disk-bar" class="progress-bar bg-info" style="width:0%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dienst-Einstellungen -->
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Dienst-Einstellungen</h5>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label small text-muted">AdGuard URL</label>
+                                <input type="text" class="form-control form-control-sm" id="cfg-adguard">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small text-muted">Grafana URL</label>
+                                <input type="text" class="form-control form-control-sm" id="cfg-grafana">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small text-muted">Dashboard-Titel</label>
+                                <input type="text" class="form-control form-control-sm" id="cfg-title">
+                            </div>
+                            <div class="col-12">
+                                <button class="btn-orange" onclick="saveSettings()">Speichern</button>
+                                <span id="cfg-msg" class="ms-2 small"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Benutzerverwaltung -->
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Benutzerverwaltung</h5>
+                        <table class="table table-sm mb-3" id="user-table" style="table-layout:fixed;width:100%">
+                            <colgroup><col style="width:30%"><col style="width:15%"><col style="width:40%"><col style="width:15%"></colgroup>
+                            <thead><tr><th>Benutzername</th><th>Rolle</th><th>Läuft ab</th><th></th></tr></thead>
+                            <tbody><tr><td colspan="4" class="text-muted">Lädt…</td></tr></tbody>
+                        </table>
+
+                        <h6 class="mt-3 mb-2" style="color:#81c784">Neuer Benutzer</h6>
+                        <div class="row g-2 align-items-end">
+                            <div class="col-md-3">
+                                <label class="form-label small text-muted">Benutzername</label>
+                                <input type="text" class="form-control form-control-sm" id="new-username">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small text-muted">Passwort</label>
+                                <input type="password" class="form-control form-control-sm" id="new-password">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label small text-muted">Rolle</label>
+                                <select class="form-select form-select-sm" id="new-role">
+                                    <option value="user">user</option>
+                                    <option value="admin">admin</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label small text-muted">Temp (Minuten)</label>
+                                <input type="number" class="form-control form-control-sm" id="new-temp" placeholder="leer = dauerhaft" min="1">
+                            </div>
+                            <div class="col-md-2">
+                                <button class="btn-orange" style="width:100%" onclick="createUser()">Erstellen</button>
+                            </div>
+                        </div>
+                        <div id="user-msg" class="mt-2 small"></div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            <div id="backup-restore" class="content" style="display: none;">
+                <h2>Backup & Restore</h2>
+
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div id="backup-nas-status" class="flex-grow-1 mb-0"></div>
+                    <button class="btn-orange" onclick="wakeNas(this)" style="white-space:nowrap">NAS aufwecken</button>
+                    <button class="btn-orange" onclick="remountNas(this)" style="white-space:nowrap;margin-left:0.5rem">Remount</button>
+                </div>
+                <div id="backup-wol-msg" class="small mb-3"></div>
+
+                <div id="backup-job-cards"></div>
+
+                <div id="backup-log-box" class="card" style="display:none;">
+                    <div class="card-body">
+                        <h5 class="card-title">Ausgabe</h5>
+                        <pre id="backup-log-output" class="small p-3 rounded mb-0"
+                             style="background:#0d1a0d;white-space:pre-wrap;max-height:300px;overflow-y:auto;color:#81c784"></pre>
+                    </div>
+                </div>
+            </div>
+            <div id="update-services" class="content" style="display: none;">
+                <h2>System &amp; Dienste Update</h2>
+
+                <!-- APT -->
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <h5 class="card-title mb-0">APT Pakete</h5>
+                            <button class="btn-orange" onclick="aptCheck(this)">Prüfen</button>
+                            <button class="btn-orange" id="btn-apt-upgrade" onclick="aptUpgrade(this)" style="display:none">Upgrade ausführen</button>
+                            <span id="apt-status" class="small text-muted ms-2"></span>
+                        </div>
+                        <div id="apt-result"></div>
+                    </div>
+                </div>
+
+                <!-- Docker Container -->
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <h5 class="card-title mb-0">Docker Container</h5>
+                            <button class="btn-orange" onclick="loadContainers(this)">Aktualisieren</button>
+                            <button class="btn-orange" id="btn-watchtower" onclick="runWatchtower(this)">Watchtower jetzt</button>
+                            <span id="watchtower-msg" class="small ms-2"></span>
+                        </div>
+                        <div id="container-table-wrap">
+                            <table class="table table-sm mb-0" style="table-layout:fixed;width:100%">
+                                <colgroup><col style="width:28%"><col style="width:30%"><col style="width:30%"><col style="width:12%"></colgroup>
+                                <thead><tr><th>Name</th><th>Image</th><th>Status</th><th></th></tr></thead>
+                                <tbody id="container-tbody"><tr><td colspan="4" class="text-muted small">Noch nicht geladen</td></tr></tbody>
+                            </table>
+                        </div>
+                        <div id="container-log-box" class="card mt-3" style="display:none;">
+                            <div class="card-body py-2">
+                                <strong class="small">Ausgabe:</strong>
+                                <pre id="container-log-output" class="small p-2 rounded mb-0" style="background:#111;max-height:200px;overflow-y:auto;white-space:pre-wrap;"></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="fail2ban" class="content" style="display: none;">
+                <h2>Fail2Ban</h2>
+
+                <!-- Status card -->
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center gap-2 flex-wrap">
+                            <span id="f2b-status-badge"></span>
+                            <button class="btn-orange" onclick="loadF2bStatus(this)">Aktualisieren</button>
+                            <span id="f2b-install-wrap" style="display:none">
+                                <button class="btn-orange" id="btn-f2b-install" onclick="f2bInstall(this)">Fail2Ban installieren</button>
+                            </span>
+                            <span id="f2b-service-btns" style="display:none" class="d-flex gap-2">
+                                <button class="btn-orange" onclick="f2bService('restart',this)">Restart</button>
+                                <button class="btn-orange" onclick="f2bService('stop',this)">Stop</button>
+                            </span>
+                            <span id="f2b-start-btn" style="display:none">
+                                <button class="btn-orange" onclick="f2bService('start',this)">Start</button>
+                            </span>
+                        </div>
+                        <div id="f2b-msg" class="small mt-2"></div>
+                    </div>
+                </div>
+
+                <!-- Jails -->
+                <div id="f2b-jails-wrap" style="display:none">
+                    <div id="f2b-jails"></div>
+                </div>
+
+                <!-- Logs -->
+                <div id="f2b-logs-wrap" style="display:none" class="card mt-3">
+                    <div class="card-body py-2">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <strong class="small">Journal-Log</strong>
+                            <button class="btn-orange" onclick="loadF2bLogs(this)">Laden</button>
+                        </div>
+                        <pre id="f2b-log-out" class="small p-2 rounded mb-0" style="background:#111;max-height:220px;overflow-y:auto;white-space:pre-wrap;"></pre>
+                    </div>
+                </div>
+            </div>
+            <div id="adguard" class="content" style="display: none; padding: 0; margin: 0;">
+                <iframe src="http://192.168.178.10:8081" style="width: 100%; height: calc(100vh - 8px); border: none; display: block;" title="AdGuard Web Panel"></iframe>
+            </div>
+            <div id="wireguard" class="content" style="display: none;">
+                <h2>WireGuard VPN</h2>
+
+                <!-- Status -->
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center gap-2 flex-wrap">
+                            <span id="wg-status-badge"></span>
+                            <button class="btn-orange" onclick="loadWgStatus(this)">Aktualisieren</button>
+                        </div>
+                        <div id="wg-iface-info" class="small text-muted mt-2"></div>
+                    </div>
+                </div>
+
+                <!-- Peers -->
+                <div class="card mb-3" id="wg-peers-card" style="display:none">
+                    <div class="card-body">
+                        <h5 class="card-title mb-2">Aktive Peers</h5>
+                        <table class="table table-sm mb-0" style="table-layout:fixed;width:100%">
+                            <colgroup><col style="width:10%"><col style="width:24%"><col style="width:18%"><col style="width:22%"><col style="width:16%"><col style="width:10%"></colgroup>
+                            <thead><tr><th>Status</th><th>Public Key</th><th>IP</th><th>Handshake</th><th>Transfer ↓/↑</th><th></th></tr></thead>
+                            <tbody id="wg-peers-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- New client -->
+                <div class="card mb-3" id="wg-newclient-card" style="display:none">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">Neuen Client erstellen</h5>
+                        <div class="row g-2 align-items-end mb-2">
+                            <div class="col-auto">
+                                <label class="form-label small mb-1">Name</label>
+                                <input id="wg-new-name" class="form-control form-control-sm" placeholder="z.B. Handy" style="width:140px">
+                            </div>
+                            <div class="col-auto">
+                                <label class="form-label small mb-1">IP (10.0.0.<strong>X</strong>)</label>
+                                <input id="wg-new-ip" class="form-control form-control-sm" type="number" min="2" max="254" placeholder="z.B. 5" style="width:100px">
+                            </div>
+                            <div class="col-auto">
+                                <button class="btn-orange" onclick="wgNewClient(this)">Erstellen</button>
+                            </div>
+                        </div>
+                        <div id="wg-new-msg" class="small"></div>
+                        <div id="wg-new-result" class="mt-3"></div>
+                    </div>
+                </div>
+            </div>
+            <div id="filemanager" class="content" style="display: none;">
+                <!-- Toolbar -->
+                <div class="fm-toolbar">
+                    <button class="btn-orange" onclick="fmMkdir()">Neuer Ordner</button>
+                    <button class="btn-orange" onclick="fmRename()">Umbenennen</button>
+                    <button class="btn-orange" onclick="fmDelete()">Löschen</button>
+                    <button class="btn-orange" onclick="fmDownload()">Download</button>
+                    <span id="fm-msg" class="small ms-2"></span>
+                </div>
+                <!-- Dual pane -->
+                <div class="fm-container">
+                    <div class="d-flex gap-2 flex-grow-1" style="min-height:0">
+                        <!-- Left pane -->
+                        <div class="fm-pane" id="fm-left" onclick="fmActivate('left')">
+                            <div class="fm-pane-header d-flex align-items-center gap-2">
+                                <select class="form-select form-select-sm" style="width:80px" onchange="fmSetHost('left',this.value)" id="fm-left-host">
+                                    <option value="pi">Pi</option>
+                                    <option value="nas">NAS</option>
+                                </select>
+                                <span class="fm-breadcrumb flex-grow-1" id="fm-left-path">/opt/server</span>
+                                <button class="btn-orange" style="padding:0.1rem 0.4rem;font-size:0.8rem" onclick="fmUp('left');event.stopPropagation()">⬆</button>
+                                <button class="btn-orange" style="padding:0.1rem 0.4rem;font-size:0.8rem" onclick="fmLoad('left');event.stopPropagation()">↺</button>
+                            </div>
+                            <div class="fm-pane-body">
+                                <table class="table table-sm mb-0" style="table-layout:fixed;width:100%">
+                                    <colgroup><col style="width:46%"><col style="width:27%"><col style="width:27%"></colgroup>
+                                    <thead><tr><th>Name</th><th>Größe</th><th>Geändert</th></tr></thead>
+                                    <tbody id="fm-left-tbody"><tr><td colspan="3" class="text-muted small">Lade…</td></tr></tbody>
+                                </table>
+                            </div>
+                            <div class="fm-pane-footer" id="fm-left-info">0 Elemente</div>
+                        </div>
+                        <!-- Center buttons -->
+                        <div class="fm-center">
+                            <button class="btn-orange" style="writing-mode:horizontal-tb;padding:0.3rem 0.5rem;font-size:0.8rem" onclick="fmTransfer('copy','left','right')" title="Kopieren →">→<br><small>Copy</small></button>
+                            <button class="btn-orange" style="writing-mode:horizontal-tb;padding:0.3rem 0.5rem;font-size:0.8rem" onclick="fmTransfer('copy','right','left')" title="← Kopieren">←<br><small>Copy</small></button>
+                            <button class="btn-orange" style="writing-mode:horizontal-tb;padding:0.3rem 0.5rem;font-size:0.8rem" onclick="fmTransfer('move','left','right')" title="Verschieben →">→<br><small>Move</small></button>
+                            <button class="btn-orange" style="writing-mode:horizontal-tb;padding:0.3rem 0.5rem;font-size:0.8rem" onclick="fmTransfer('move','right','left')" title="← Verschieben">←<br><small>Move</small></button>
+                        </div>
+                        <!-- Right pane -->
+                        <div class="fm-pane" id="fm-right" onclick="fmActivate('right')">
+                            <div class="fm-pane-header d-flex align-items-center gap-2">
+                                <select class="form-select form-select-sm" style="width:80px" onchange="fmSetHost('right',this.value)" id="fm-right-host">
+                                    <option value="pi">Pi</option>
+                                    <option value="nas" selected>NAS</option>
+                                </select>
+                                <span class="fm-breadcrumb flex-grow-1" id="fm-right-path">/mnt/nas-backup</span>
+                                <button class="btn-orange" style="padding:0.1rem 0.4rem;font-size:0.8rem" onclick="fmUp('right');event.stopPropagation()">⬆</button>
+                                <button class="btn-orange" style="padding:0.1rem 0.4rem;font-size:0.8rem" onclick="fmLoad('right');event.stopPropagation()">↺</button>
+                            </div>
+                            <div class="fm-pane-body">
+                                <table class="table table-sm mb-0" style="table-layout:fixed;width:100%">
+                                    <colgroup><col style="width:46%"><col style="width:27%"><col style="width:27%"></colgroup>
+                                    <thead><tr><th>Name</th><th>Größe</th><th>Geändert</th></tr></thead>
+                                    <tbody id="fm-right-tbody"><tr><td colspan="3" class="text-muted small">Lade…</td></tr></tbody>
+                                </table>
+                            </div>
+                            <div class="fm-pane-footer" id="fm-right-info">0 Elemente</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="downloader" class="content" style="display: none;">
+                <h2>Downloader</h2>
+
+                <div id="dl-dep-warn" class="alert alert-warning py-2 small mb-3" style="display:none"></div>
+
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <!-- Preview strip -->
+                        <div id="dl-preview" class="d-flex gap-3 align-items-center mb-3" style="display:none!important">
+                            <img id="dl-thumb" src="" style="height:64px;border-radius:4px;display:none">
+                            <div>
+                                <div id="dl-preview-title" class="small fw-bold"></div>
+                                <div id="dl-preview-meta" class="small text-muted"></div>
+                            </div>
+                        </div>
+
+                        <div class="mb-2">
+                            <label class="form-label small mb-1">URLs (eine pro Zeile — YouTube, Vimeo, PornHub, RedTube, Twitter, …)</label>
+                            <div class="d-flex gap-2">
+                                <textarea id="dl-urls" class="form-control form-control-sm" rows="3"
+                                    placeholder="https://www.youtube.com/watch?v=&#10;https://www.pornhub.com/view_video.php?viewkey=&#10;https://www.redtube.com/..."></textarea>
+                            </div>
+                        </div>
+                        <div class="d-flex gap-2 align-items-center flex-wrap">
+                            <select id="dl-format" class="form-select form-select-sm" style="width:auto">
+                                <option value="best">Bestes Video</option>
+                                <option value="1080">Video 1080p</option>
+                                <option value="720">Video 720p</option>
+                                <option value="audio">Nur Audio (MP3)</option>
+                            </select>
+                            <select id="dl-dest" class="form-select form-select-sm" style="width:auto">
+                                <option value="pi">Pi ~/downloads</option>
+                                <option value="nas">NAS /downloads</option>
+                            </select>
+                            <button class="btn-orange" onclick="dlPreview(this)">Vorschau</button>
+                            <button class="btn-orange" onclick="dlAdd(this)">Download starten</button>
+                            <button class="btn-orange" onclick="dlClear(this)">Fertige löschen</button>
+                            <span id="dl-msg" class="small ms-1"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="dl-jobs"></div>
+
+                <div class="mt-4">
+                    <h5 style="color:#a5d6a7">Verlauf (letzte 10)</h5>
+                    <div id="dl-history"><div class="text-muted small">Lade…</div></div>
+                </div>
+            </div>
+            <div id="grow-controller" class="content" style="display: none;">
+                <h2>Grow Controller</h2>
+                <p>Grow Controller-Konfiguration</p>
+            </div>
+            <div id="trading-bot" class="content" style="display: none;">
+                <h2>Trading Bot</h2>
+                <p>Trading Bot-Verwaltung</p>
+            </div>
+            <div id="klipper" class="content" style="display: none;">
+                <h2>3D Drucker/Klipper</h2>
+                <p>Klipper-Verwaltung</p>
+            </div>
+            <div id="databases" class="content" style="display: none;">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <h2 class="mb-0">Datenbanken</h2>
+                    <button class="btn-orange ms-2" onclick="dbLoad()">↺ Aktualisieren</button>
+                    <a id="db-pgadmin-link" href="#" target="_blank" class="btn-orange ms-1">pgAdmin öffnen ↗</a>
+                </div>
+                <div id="db-error" class="alert alert-danger py-2 small" style="display:none"></div>
+
+                <div class="row g-3 mb-3">
+                    <!-- DB list -->
+                    <div class="col-md-4">
+                        <div class="card h-100">
+                            <div class="card-body p-2">
+                                <h6 class="card-title mb-2">Datenbanken</h6>
+                                <div id="db-list"><div class="text-muted small">Lade…</div></div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Table list -->
+                    <div class="col-md-8">
+                        <div class="card h-100">
+                            <div class="card-body p-2">
+                                <h6 class="card-title mb-2" id="db-tables-title">Tabellen</h6>
+                                <div id="db-tables"><div class="text-muted small">Datenbank auswählen…</div></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Column list — full width row -->
+                <div class="row g-3 mb-3">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-body p-2">
+                                <h6 class="card-title mb-2" id="db-cols-title">Spalten</h6>
+                                <div id="db-cols"><div class="text-muted small">Tabelle auswählen…</div></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Data preview — full width row -->
+                <div class="row g-3" id="db-preview-row" style="display:none">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-body p-2">
+                                <h6 class="card-title mb-2" id="db-preview-title">Vorschau</h6>
+                                <div style="overflow-x:auto">
+                                    <div id="db-preview"><div class="text-muted small">Lade…</div></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="system" class="content" style="display: none;">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h2 class="mb-0">Systemmetriken</h2>
+                    <div class="d-flex gap-2">
+                        <a href="http://grafana.internal.avataryx.de" target="_blank" class="btn btn-orange btn-sm">Grafana öffnen</a>
+                        <button class="btn btn-secondary btn-sm" onclick="metricsRefresh()">↻ Aktualisieren</button>
+                    </div>
+                </div>
+
+                <!-- Row 1: CPU / Temp / Load -->
+                <div class="row g-3 mb-3">
+                    <div class="col-md-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <div class="card-title">CPU</div>
+                                <div class="d-flex align-items-baseline gap-2 mb-1">
+                                    <span id="met-cpu-pct" class="fs-3 fw-bold">—</span>
+                                    <span class="text-muted small" id="met-cpu-cores"></span>
+                                </div>
+                                <div style="background:#33383f;border-radius:3px;height:8px">
+                                    <div id="met-cpu-bar" style="width:0%;height:8px;background:#4caf50;border-radius:3px;transition:width .6s"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <div class="card-title">Temperatur</div>
+                                <span id="met-temp" class="fs-3 fw-bold">—</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <div class="card-title">Load Average</div>
+                                <div id="met-load" class="small mt-1">—</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Row 2: RAM / Swap -->
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <div class="card-title">RAM</div>
+                                <div class="d-flex justify-content-between small mb-1">
+                                    <span id="met-mem-used">—</span>
+                                    <span id="met-mem-pct" class="text-muted">—</span>
+                                </div>
+                                <div style="background:#33383f;border-radius:3px;height:8px">
+                                    <div id="met-mem-bar" style="width:0%;height:8px;background:#2196f3;border-radius:3px;transition:width .6s"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <div class="card-title">Swap</div>
+                                <div class="d-flex justify-content-between small mb-1">
+                                    <span id="met-swap-used">—</span>
+                                    <span id="met-swap-pct" class="text-muted">—</span>
+                                </div>
+                                <div style="background:#33383f;border-radius:3px;height:8px">
+                                    <div id="met-swap-bar" style="width:0%;height:8px;background:#ff9800;border-radius:3px;transition:width .6s"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Disks -->
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="card-title">Festplatten</div>
+                        <div id="met-disks" class="small">—</div>
+                    </div>
+                </div>
+
+                <!-- Network -->
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="card-title">Netzwerk I/O</div>
+                        <div id="met-net" class="small">—</div>
+                    </div>
+                </div>
+
+                <!-- Containers -->
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="card-title">Container</div>
+                        <div id="met-containers" class="small">—</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="portainer" class="content" style="display: none; padding: 0; margin: 0;">
+                <iframe src="https://portainer.internal.avataryx.de" style="width:100%;height:calc(100vh - 8px);border:none;display:block;" title="Portainer"></iframe>
+            </div>
+            <div id="homer-tab" class="content" style="display: none; padding: 0; margin: 0;">
+                <iframe src="https://homer.internal.avataryx.de" style="width:100%;height:calc(100vh - 8px);border:none;display:block;" title="Homer"></iframe>
+            </div>
+            <div id="kuma-tab" class="content" style="display: none; padding: 0; margin: 0;">
+                <iframe src="https://kuma.internal.avataryx.de" style="width:100%;height:calc(100vh - 8px);border:none;display:block;" title="Uptime Kuma"></iframe>
+            </div>
+            <div id="traefik-tab" class="content" style="display: none; padding: 0; margin: 0;">
+                <iframe src="https://traefik.internal.avataryx.de" style="width:100%;height:calc(100vh - 8px);border:none;display:block;" title="Traefik"></iframe>
+            </div>
+            <div id="vaultwarden-tab" class="content" style="display: none; padding: 0; margin: 0;">
+                <iframe src="https://vaultwarden.internal.avataryx.de" style="width:100%;height:calc(100vh - 8px);border:none;display:block;" title="Vaultwarden"></iframe>
+            </div>
+            <div id="nextcloud-tab" class="content" style="display: none; padding: 0; margin: 0;">
+                <iframe src="https://cloud.internal.avataryx.de" style="width:100%;height:calc(100vh - 8px);border:none;display:block;" title="Nextcloud"></iframe>
+            </div>
+        </main>
+    </div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const navLinks = document.querySelectorAll('.nav-link');
+        const contents = document.querySelectorAll('.content');
+        const header = document.querySelector('header');
+        const mainEl = document.querySelector('main');
+        const IFRAME_TABS = new Set(['adguard','portainer','homer-tab','kuma-tab','traefik-tab','vaultwarden-tab','nextcloud-tab']);
+
+        console.log('Debug: Page Loaded.'); // Debug: Initiale Seite geladen
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href').substring(1);
+
+                console.log('Debug: Navigating to:', targetId); // Debug: Zielbereich
+                contents.forEach(content => {
+                    content.style.display = 'none';
+                });
+
+                document.getElementById(targetId).style.display = 'block';
+
+                mainEl.classList.toggle('iframe-mode', IFRAME_TABS.has(targetId));
+                if (targetId === 'settings') { loadSysinfo(); loadUsers(); loadSettings(); }
+                if (targetId === 'backup-restore') loadBackupStatus();
+                if (targetId === 'update-services') loadContainers();
+                if (targetId === 'fail2ban') loadF2bStatus();
+                if (targetId === 'wireguard') loadWgStatus();
+                if (targetId === 'filemanager') fmInit();
+                if (targetId === 'downloader') dlPollStart();
+                if (targetId === 'databases') dbLoad();
+                if (targetId === 'system') metricsInit();
+
+                // Zeige den Header nur auf der Willkommensseite
+                if (targetId === 'welcome') {
+                    header.style.display = 'block';
+                    console.log('Debug: Header visible'); // Debug: Header sichtbar
+                } else {
+                    header.style.display = 'none';
+                    console.log('Debug: Header hidden'); // Debug: Header ausgeblendet
+                }
+
+                navLinks.forEach(nav => nav.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        // Zeige standardmäßig die Willkommensseite und den Header
+        document.getElementById('welcome').style.display = 'block';
+        header.style.display = 'block';
+    });
+
+    // Uhr
+    const DAYS = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
+    function updateClock() {
+        const now = new Date();
+        const day = DAYS[now.getDay()];
+        const date = now.toLocaleDateString('de-DE');
+        const time = now.toLocaleTimeString('de-DE');
+        document.getElementById('footerClock').textContent = `${day}, ${date} ${time}`;
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
+
+    // Temperatur
+    async function loadTemp() {
+        try {
+            const res = await fetch('/api/temperature');
+            const data = await res.json();
+            document.getElementById('footerTemp').textContent =
+                data.temp !== null ? data.temp + ' °C' : '—';
+        } catch(e) {}
+    }
+    loadTemp();
+    setInterval(loadTemp, 30000);
+
+    // Alerts
+    async function loadAlerts() {
+        try {
+            const res = await fetch('/api/alerts');
+            const data = await res.json();
+            const box = document.getElementById('alertBox');
+            if (!data.alerts.length) { box.innerHTML = ''; return; }
+            box.innerHTML = data.alerts.map(a =>
+                `<div class="alert alert-${a.level} py-2 mb-1 small">${a.msg}</div>`
+            ).join('');
+        } catch(e) {}
+    }
+    loadAlerts();
+    setInterval(loadAlerts, 60000);
+
+    // News
+    async function loadNews(topic, elementId) {
+        try {
+            const res = await fetch(`/api/news/${topic}`);
+            const data = await res.json();
+            const el = document.getElementById(elementId);
+            if (data.error) { el.innerHTML = `<li class="text-danger">${data.error}</li>`; return; }
+            el.innerHTML = data.articles.map(a =>
+                `<li class="mb-2">
+                    <a href="${a.link}" target="_blank" class="text-decoration-none">${a.title}</a>
+                    <br><small class="text-muted">${a.source} · ${a.pubDate}</small>
+                </li>`
+            ).join('');
+        } catch(e) {}
+    }
+    loadNews('crypto', 'cryptoNews');
+    loadNews('ai', 'aiNews');
+
+    // Backup & Restore
+    async function remountNas(btn) {
+        btn.disabled = true;
+        btn.style.opacity = '0.5';
+        const msg = document.getElementById('backup-wol-msg');
+        try {
+            const res = await fetch('/api/backup/remount', {method: 'POST'});
+            const d = await res.json();
+            if (res.ok) {
+                btn.style.background = '#2e7d32'; btn.style.borderColor = '#2e7d32';
+                msg.textContent = d.message; msg.style.color = '#4caf50';
+                loadBackupStatus();
+            } else {
+                btn.style.background = '#c62828'; btn.style.borderColor = '#c62828';
+                msg.textContent = d.error; msg.style.color = '#ff4444';
+            }
+        } catch(e) { msg.textContent = 'Fehler'; msg.style.color = '#ff4444'; }
+        setTimeout(() => { btn.disabled = false; btn.style.opacity = '1'; btn.style.background = ''; btn.style.borderColor = ''; }, 5000);
+    }
+
+    async function wakeNas(btn) {
+        btn.disabled = true;
+        btn.style.opacity = '0.5';
+        const msg = document.getElementById('backup-wol-msg');
+        try {
+            const res = await fetch('/api/backup/wake-nas', {method: 'POST'});
+            const d = await res.json();
+            if (res.ok) {
+                btn.style.background = '#2e7d32';
+                btn.style.borderColor = '#2e7d32';
+                msg.textContent = d.message;
+                msg.style.color = '#4caf50';
+            } else {
+                btn.style.background = '#c62828';
+                btn.style.borderColor = '#c62828';
+                msg.textContent = d.error;
+                msg.style.color = '#ff4444';
+            }
+        } catch(e) {
+            msg.textContent = 'Fehler beim Senden';
+            msg.style.color = '#ff4444';
+        }
+        setTimeout(() => {
+            btn.disabled = false;
+            btn.style.opacity = '1';
+            btn.style.background = '';
+            btn.style.borderColor = '';
+        }, 5000);
+        setTimeout(() => loadBackupStatus(), 90000);
+    }
+
+    const BACKUP_CATEGORIES = {pi: 'Pi', vps: 'VPS', windows: 'Windows'};
+
+    async function loadBackupStatus() {
+        try {
+            const res = await fetch('/api/backup/status');
+            const d = await res.json();
+
+            document.getElementById('backup-nas-status').innerHTML = d.mount_ok
+                ? '<div class="alert alert-success py-2 mb-3">NAS gemountet <strong>(/mnt/nas-backup)</strong></div>'
+                : '<div class="alert alert-danger py-2 mb-3">NAS <strong>nicht gemountet</strong> — Backup nicht möglich</div>';
+
+            const groups = {};
+            for (const j of d.jobs) {
+                if (!groups[j.category]) groups[j.category] = [];
+                groups[j.category].push(j);
+            }
+
+            let html = '';
+            for (const [cat, jobs] of Object.entries(groups)) {
+                const rows = jobs.map(j => {
+                    const icon = j.configured
+                        ? (j.exists ? '<span class="badge bg-success">✓</span>' : '<span class="badge bg-danger">!</span>')
+                        : '<span class="badge bg-secondary">—</span>';
+                    const canRun = d.mount_ok && j.exists && j.configured;
+                    const btn = j.configured
+                        ? `<button class="btn-orange" id="bbtn-${j.name}" onclick="runBackup('${j.name}', this)"${canRun ? '' : ' disabled style="opacity:.5;cursor:not-allowed"'}>Starten</button>`
+                        : `<span class="text-muted small">nicht konfiguriert</span>`;
+                    return `<tr><td>${icon} ${j.name}</td><td><small class="text-muted">${j.last_log}</small></td><td>${btn}</td></tr>`;
+                }).join('');
+                html += `<div class="card mb-3"><div class="card-body">
+                    <h5 class="card-title">${BACKUP_CATEGORIES[cat] || cat} Backup-Jobs</h5>
+                    <table class="table table-sm mb-0" style="table-layout:fixed;width:100%">
+                    <colgroup><col class="col-job"><col class="col-lastrun"><col class="col-action"></colgroup>
+                    <thead><tr><th>Job</th><th>Letzter Lauf</th><th></th></tr></thead>
+                    <tbody>${rows}</tbody></table></div></div>`;
+            }
+            document.getElementById('backup-job-cards').innerHTML = html;
+        } catch(e) {}
+    }
+
+    async function runBackup(name, btn) {
+        btn.disabled = true;
+        btn.textContent = 'Läuft…';
+        btn.style.opacity = '0.5';
+        const logBox = document.getElementById('backup-log-box');
+        const logOut = document.getElementById('backup-log-output');
+        logBox.style.display = 'block';
+        logOut.textContent = `Starte ${name}…`;
+        try {
+            const res = await fetch(`/backup/run/${name}`, {method: 'POST'});
+            const d = await res.json();
+            if (d.error) {
+                logOut.textContent = 'Fehler: ' + d.error;
+            } else {
+                logOut.textContent = (d.stdout || '') + (d.stderr ? '\nSTDERR:\n' + d.stderr : '');
+            }
+        } catch(e) {
+            logOut.textContent = 'Fehler: ' + e;
+        }
+        btn.textContent = 'Starten';
+        btn.disabled = false;
+        loadBackupStatus();
+    }
+
+    // Settings
+    async function loadSettings() {
+        try {
+            const res = await fetch('/admin/settings');
+            if (!res.ok) return;
+            const d = await res.json();
+            if (d.adguard_url) document.getElementById('cfg-adguard').value = d.adguard_url;
+            if (d.grafana_url) document.getElementById('cfg-grafana').value = d.grafana_url;
+            if (d.dashboard_title) document.getElementById('cfg-title').value = d.dashboard_title;
+        } catch(e) {}
+    }
+
+    async function saveSettings() {
+        const payload = {
+            adguard_url: document.getElementById('cfg-adguard').value.trim(),
+            grafana_url: document.getElementById('cfg-grafana').value.trim(),
+            dashboard_title: document.getElementById('cfg-title').value.trim(),
+        };
+        try {
+            const res = await fetch('/admin/settings', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            });
+            const d = await res.json();
+            const msg = document.getElementById('cfg-msg');
+            msg.textContent = d.message || d.error;
+            msg.style.color = res.ok ? '#4caf50' : '#ff4444';
+            setTimeout(() => msg.textContent = '', 3000);
+        } catch(e) {}
+    }
+
+    // User management
+    async function loadUsers() {
+        try {
+            const res = await fetch('/admin/users');
+            if (!res.ok) return;
+            const d = await res.json();
+            const tbody = document.querySelector('#user-table tbody');
+            if (!d.users.length) {
+                tbody.innerHTML = '<tr><td colspan="4" class="text-muted">Keine Benutzer</td></tr>';
+                return;
+            }
+            tbody.innerHTML = d.users.map(u => {
+                const exp = u.expires_at
+                    ? `<span class="badge" style="background:#e67e00;color:#fff">${new Date(u.expires_at).toLocaleTimeString('de-DE', {hour:'2-digit',minute:'2-digit'})} Uhr</span>`
+                    : '<span class="text-muted small">—</span>';
+                const delBtn = `<button class="btn btn-sm btn-danger py-0 px-2" onclick="deleteUser('${u.username}')">✕</button>`;
+                return `<tr><td>${u.username}</td><td><span class="badge ${u.role==='admin'?'bg-danger':'bg-secondary'}">${u.role}</span></td><td>${exp}</td><td>${delBtn}</td></tr>`;
+            }).join('');
+        } catch(e) {}
+    }
+
+    async function createUser() {
+        const payload = {
+            username: document.getElementById('new-username').value.trim(),
+            password: document.getElementById('new-password').value,
+            role: document.getElementById('new-role').value,
+            temp_minutes: document.getElementById('new-temp').value || null,
+        };
+        const msg = document.getElementById('user-msg');
+        try {
+            const res = await fetch('/admin/users/create', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            });
+            const d = await res.json();
+            msg.textContent = d.message || d.error;
+            msg.style.color = res.ok ? '#4caf50' : '#ff4444';
+            if (res.ok) {
+                document.getElementById('new-username').value = '';
+                document.getElementById('new-password').value = '';
+                document.getElementById('new-temp').value = '';
+                loadUsers();
+            }
+        } catch(e) { msg.textContent = 'Fehler'; msg.style.color = '#ff4444'; }
+    }
+
+    async function deleteUser(username) {
+        if (!confirm(`Benutzer '${username}' wirklich löschen?`)) return;
+        try {
+            const res = await fetch('/admin/users/delete', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({username})
+            });
+            const d = await res.json();
+            document.getElementById('user-msg').textContent = d.message || d.error;
+            document.getElementById('user-msg').style.color = res.ok ? '#4caf50' : '#ff4444';
+            if (res.ok) loadUsers();
+        } catch(e) {}
+    }
+
+    // Sysinfo
+    async function loadSysinfo() {
+        try {
+            const res = await fetch('/api/sysinfo');
+            const d = await res.json();
+            document.getElementById('si-hostname').textContent = d.hostname || '—';
+            document.getElementById('si-ip').textContent = d.ip || '—';
+            document.getElementById('si-uptime').textContent = d.uptime || '—';
+            document.getElementById('si-os').textContent = d.os || '—';
+            document.getElementById('si-temp').textContent = d.cpu_temp !== null ? d.cpu_temp + ' °C' : '—';
+            if (d.mem_total && d.mem_used) {
+                const pct = Math.round(d.mem_used / d.mem_total * 100);
+                document.getElementById('si-mem').textContent = `${d.mem_used} MB / ${d.mem_total} MB (${pct}%)`;
+                document.getElementById('si-mem-bar').style.width = pct + '%';
+            }
+            if (d.disk_total && d.disk_used) {
+                document.getElementById('si-disk').textContent = `${d.disk_used} GB / ${d.disk_total} GB (${d.disk_pct}%)`;
+                document.getElementById('si-disk-bar').style.width = d.disk_pct + '%';
+                document.getElementById('si-disk-bar').className = `progress-bar ${d.disk_pct > 85 ? 'bg-danger' : 'bg-info'}`;
+            }
+        } catch(e) {}
+    }
+
+    // System & Dienste Update
+    async function aptCheck(btn) {
+        btn.disabled = true;
+        btn.textContent = 'Prüfe…';
+        const status = document.getElementById('apt-status');
+        const result = document.getElementById('apt-result');
+        const upgradeBtn = document.getElementById('btn-apt-upgrade');
+        status.textContent = '';
+        result.innerHTML = '';
+        upgradeBtn.style.display = 'none';
+        try {
+            const res = await fetch('/api/system/apt-check');
+            const d = await res.json();
+            if (!res.ok) { status.textContent = d.error || 'Fehler'; status.style.color = '#ff4444'; return; }
+            if (d.count === 0) {
+                result.innerHTML = '<span class="text-success small">Alles aktuell — keine Updates verfügbar.</span>';
+            } else {
+                upgradeBtn.style.display = '';
+                result.innerHTML = `<div class="small text-warning mb-1"><strong>${d.count} Paket(e) verfügbar:</strong></div>`
+                    + `<pre class="small p-2 rounded mb-0" style="background:#111;max-height:160px;overflow-y:auto;">${d.packages.join('\n')}</pre>`;
+            }
+        } catch(e) { status.textContent = 'Fehler'; status.style.color = '#ff4444'; }
+        finally { btn.disabled = false; btn.textContent = 'Prüfen'; }
+    }
+
+    async function aptUpgrade(btn) {
+        if (!confirm('APT Upgrade ausführen? (kann einige Minuten dauern)')) return;
+        btn.disabled = true;
+        btn.textContent = 'Läuft…';
+        const status = document.getElementById('apt-status');
+        status.textContent = 'Upgrade läuft…'; status.style.color = '#ffa726';
+        try {
+            const res = await fetch('/api/system/apt-upgrade', {method: 'POST'});
+            const d = await res.json();
+            const result = document.getElementById('apt-result');
+            if (d.error) {
+                status.textContent = d.error; status.style.color = '#ff4444';
+            } else {
+                status.textContent = d.returncode === 0 ? 'Upgrade erfolgreich' : 'Beendet mit Fehlern';
+                status.style.color = d.returncode === 0 ? '#4caf50' : '#ff4444';
+                result.innerHTML = `<pre class="small p-2 rounded mb-0 mt-2" style="background:#111;max-height:200px;overflow-y:auto;white-space:pre-wrap;">${d.output}</pre>`;
+            }
+        } catch(e) { status.textContent = 'Fehler'; status.style.color = '#ff4444'; }
+        finally { btn.disabled = false; btn.textContent = 'Upgrade ausführen'; }
+    }
+
+    async function loadContainers(btn) {
+        const tbody = document.getElementById('container-tbody');
+        tbody.innerHTML = '<tr><td colspan="4" class="text-muted small">Lade…</td></tr>';
+        try {
+            const res = await fetch('/api/system/containers');
+            const d = await res.json();
+            if (!d.containers || !d.containers.length) {
+                tbody.innerHTML = '<tr><td colspan="4" class="text-muted small">Keine Container</td></tr>';
+                return;
+            }
+            tbody.innerHTML = d.containers.map(c => {
+                const badge = c.up
+                    ? '<span class="badge bg-success">Up</span>'
+                    : '<span class="badge bg-danger">Down</span>';
+                const restartBtn = `<button class="btn-orange" onclick="restartContainer('${c.name}', this)">Restart</button>`;
+                return `<tr>
+                    <td class="text-truncate" title="${c.name}">${c.name}</td>
+                    <td class="text-truncate small text-muted" title="${c.image}">${c.image}</td>
+                    <td>${badge} <small class="text-muted">${c.running_for}</small></td>
+                    <td>${restartBtn}</td>
+                </tr>`;
+            }).join('');
+        } catch(e) { tbody.innerHTML = '<tr><td colspan="4" class="text-danger small">Fehler beim Laden</td></tr>'; }
+        if (btn) { btn.disabled = false; }
+    }
+
+    async function restartContainer(name, btn) {
+        btn.disabled = true;
+        btn.textContent = '…';
+        const logBox = document.getElementById('container-log-box');
+        const logOut = document.getElementById('container-log-output');
+        logBox.style.display = 'block';
+        logOut.textContent = `Starte ${name} neu…`;
+        try {
+            const res = await fetch(`/api/system/container-restart/${name}`, {method: 'POST'});
+            const d = await res.json();
+            if (d.error) {
+                logOut.textContent = 'Fehler: ' + d.error;
+            } else {
+                logOut.textContent = d.returncode === 0 ? `${name} erfolgreich neu gestartet.` : (d.output || 'Beendet');
+            }
+        } catch(e) { logOut.textContent = 'Fehler: ' + e; }
+        btn.disabled = false;
+        btn.textContent = 'Restart';
+        setTimeout(() => loadContainers(), 1500);
+    }
+
+    // Databases
+    let _dbSelected = null;
+    let _tableSelected = null;
+
+    async function dbLoad() {
+        document.getElementById('db-error').style.display = 'none';
+        document.getElementById('db-list').innerHTML = '<div class="text-muted small">Lade…</div>';
+        try {
+            const res = await fetch('/api/db/list');
+            const d = await res.json();
+            if (d.error) {
+                document.getElementById('db-error').textContent = d.error;
+                document.getElementById('db-error').style.display = '';
+                document.getElementById('db-list').innerHTML = '';
+                return;
+            }
+            document.getElementById('db-pgadmin-link').href = d.pgadmin_url;
+            const list = document.getElementById('db-list');
+            list.innerHTML = d.databases.map(db => `
+                <div class="d-flex justify-content-between align-items-center px-2 py-1 rounded mb-1 fm-row${_dbSelected === db.name ? ' fm-selected' : ''}"
+                     onclick="dbSelectDb('${db.name}')">
+                    <span class="small">🗄 ${db.name}</span>
+                    <span class="small text-muted">${db.size}</span>
+                </div>`).join('');
+        } catch(e) {
+            document.getElementById('db-error').textContent = 'Verbindungsfehler: ' + e;
+            document.getElementById('db-error').style.display = '';
+        }
+    }
+
+    async function dbSelectDb(name) {
+        _dbSelected = name;
+        _tableSelected = null;
+        dbLoad();
+        document.getElementById('db-tables-title').textContent = `Tabellen — ${name}`;
+        document.getElementById('db-cols-title').textContent = 'Spalten';
+        document.getElementById('db-cols').innerHTML = '<div class="text-muted small">Tabelle auswählen…</div>';
+        document.getElementById('db-tables').innerHTML = '<div class="text-muted small">Lade…</div>';
+        try {
+            const res = await fetch(`/api/db/tables?db=${encodeURIComponent(name)}`);
+            const d = await res.json();
+            if (d.error) { document.getElementById('db-tables').innerHTML = `<div class="text-danger small">${d.error}</div>`; return; }
+            if (!d.tables.length) { document.getElementById('db-tables').innerHTML = '<div class="text-muted small">(keine Tabellen)</div>'; return; }
+            document.getElementById('db-tables').innerHTML = d.tables.map(t => `
+                <div class="d-flex justify-content-between align-items-center px-2 py-1 rounded mb-1 fm-row${_tableSelected === t.name ? ' fm-selected' : ''}"
+                     onclick="dbSelectTable('${name}','${t.schema}','${t.name}')">
+                    <span class="small text-truncate" style="max-width:60%" title="${t.schema}.${t.name}">
+                        ${t.schema !== 'public' ? `<span class="text-muted">${t.schema}.</span>` : ''}${t.name}
+                    </span>
+                    <span class="small text-muted">${Number(t.rows).toLocaleString('de-DE')} rows · ${t.size}</span>
+                </div>`).join('');
+        } catch(e) { document.getElementById('db-tables').innerHTML = `<div class="text-danger small">${e}</div>`; }
+    }
+
+    async function dbSelectTable(db, schema, table) {
+        _tableSelected = table;
+        document.getElementById('db-cols-title').textContent = `Spalten — ${table}`;
+        document.getElementById('db-cols').innerHTML = '<div class="text-muted small">Lade…</div>';
+        document.getElementById('db-preview-row').style.display = 'none';
+        document.querySelectorAll('#db-tables .fm-row').forEach(el => {
+            el.classList.toggle('fm-selected', el.querySelector('.small')?.textContent?.includes(table));
+        });
+        try {
+            const res = await fetch(`/api/db/columns?db=${encodeURIComponent(db)}&table=${encodeURIComponent(table)}&schema=${encodeURIComponent(schema)}`);
+            const d = await res.json();
+            if (d.error) { document.getElementById('db-cols').innerHTML = `<div class="text-danger small">${d.error}</div>`; return; }
+            document.getElementById('db-cols').innerHTML = `
+                <table class="table table-sm mb-0" style="table-layout:fixed;width:100%">
+                    <colgroup><col style="width:38%"><col style="width:32%"><col style="width:15%"><col style="width:15%"></colgroup>
+                    <thead><tr><th>Spalte</th><th>Typ</th><th>Nullable</th><th>Default</th></tr></thead>
+                    <tbody>${d.columns.map(c => `<tr>
+                        <td class="small text-truncate" title="${c.name}">${c.name}</td>
+                        <td class="small text-muted text-truncate">${c.type}</td>
+                        <td class="small text-muted">${c.nullable === 'YES' ? '✓' : '✗'}</td>
+                        <td class="small text-muted text-truncate" title="${c.default||''}">${c.default || '—'}</td>
+                    </tr>`).join('')}</tbody>
+                </table>`;
+        } catch(e) { document.getElementById('db-cols').innerHTML = `<div class="text-danger small">${e}</div>`; }
+
+        // auto-load preview
+        dbLoadPreview(db, schema, table);
+    }
+
+    async function dbLoadPreview(db, schema, table) {
+        const row = document.getElementById('db-preview-row');
+        const wrap = document.getElementById('db-preview');
+        document.getElementById('db-preview-title').textContent = `Vorschau — ${table} (max. 15 Zeilen)`;
+        row.style.display = '';
+        wrap.innerHTML = '<div class="text-muted small">Lade…</div>';
+        try {
+            const res = await fetch(`/api/db/preview?db=${encodeURIComponent(db)}&table=${encodeURIComponent(table)}&schema=${encodeURIComponent(schema)}`);
+            const d = await res.json();
+            if (d.error) { wrap.innerHTML = `<div class="text-danger small">${d.error}</div>`; return; }
+            if (!d.rows.length) { wrap.innerHTML = '<div class="text-muted small">(keine Daten)</div>'; return; }
+            const esc = v => v === null ? '<span class="text-muted">NULL</span>'
+                : String(v).length > 60 ? String(v).substring(0, 60) + '…'
+                : String(v);
+            wrap.innerHTML = `<table class="table table-sm mb-0" style="white-space:nowrap">
+                <thead><tr>${d.columns.map(c => `<th>${c}</th>`).join('')}</tr></thead>
+                <tbody>${d.rows.map(r =>
+                    `<tr>${d.columns.map(c => `<td class="small">${esc(r[c])}</td>`).join('')}</tr>`
+                ).join('')}</tbody>
+            </table>`;
+        } catch(e) { wrap.innerHTML = `<div class="text-danger small">${e}</div>`; }
+    }
+
+    // Downloader
+    let dlPollTimer = null;
+
+    function dlPollStart() {
+        fetch('/api/dl/check').then(r=>r.json()).then(d=>{
+            const warn = document.getElementById('dl-dep-warn');
+            const missing = [];
+            if (!d.yt_dlp) missing.push('yt-dlp (pip install yt-dlp)');
+            if (!d.ffmpeg) missing.push('ffmpeg (sudo apt install ffmpeg)');
+            if (missing.length) {
+                warn.textContent = '⚠ Fehlende Abhängigkeiten: ' + missing.join(', ');
+                warn.style.display = '';
+            } else {
+                warn.style.display = 'none';
+            }
+        }).catch(()=>{});
+        dlLoadStatus();
+        dlLoadHistory();
+        if (!dlPollTimer) dlPollTimer = setInterval(() => { dlLoadStatus(); dlLoadHistory(); }, 3000);
+    }
+
+    async function dlPreview(btn) {
+        const url = document.getElementById('dl-urls').value.trim().split('\n')[0].trim();
+        if (!url) return;
+        btn.disabled = true; btn.textContent = '…';
+        const msg = document.getElementById('dl-msg');
+        msg.textContent = 'Lade Info…'; msg.style.color = '#90caf9';
+        try {
+            const res = await fetch('/api/dl/info', {
+                method: 'POST', headers: {'Content-Type':'application/json'},
+                body: JSON.stringify({url})
+            });
+            const d = await res.json();
+            if (d.error) { msg.textContent = d.error; msg.style.color='#ff4444'; }
+            else {
+                msg.textContent = '';
+                const prev = document.getElementById('dl-preview');
+                const thumb = document.getElementById('dl-thumb');
+                document.getElementById('dl-preview-title').textContent = d.title;
+                const dur = d.duration ? `${Math.floor(d.duration/60)}:${String(d.duration%60).padStart(2,'0')}` : '';
+                document.getElementById('dl-preview-meta').textContent =
+                    [d.extractor, d.uploader, dur].filter(Boolean).join(' · ');
+                if (d.thumbnail) { thumb.src = d.thumbnail; thumb.style.display=''; }
+                else { thumb.style.display='none'; }
+                prev.style.display = 'flex';
+            }
+        } catch(e) { msg.textContent = 'Fehler'; msg.style.color='#ff4444'; }
+        btn.disabled = false; btn.textContent = 'Vorschau';
+    }
+
+    async function dlAdd(btn) {
+        const urls = document.getElementById('dl-urls').value.trim();
+        const fmt  = document.getElementById('dl-format').value;
+        const dest = document.getElementById('dl-dest').value;
+        const msg  = document.getElementById('dl-msg');
+        if (!urls) { msg.textContent = 'Keine URLs eingegeben'; msg.style.color='#ffa726'; return; }
+        btn.disabled = true;
+        try {
+            const res = await fetch('/api/dl/add', {
+                method: 'POST', headers: {'Content-Type':'application/json'},
+                body: JSON.stringify({urls, format: fmt, dest})
+            });
+            const d = await res.json();
+            msg.textContent = d.message || d.error;
+            msg.style.color = res.ok ? '#4caf50' : '#ff4444';
+            if (res.ok) { document.getElementById('dl-urls').value = ''; dlLoadStatus(); }
+        } catch(e) { msg.textContent = 'Fehler'; msg.style.color='#ff4444'; }
+        btn.disabled = false;
+    }
+
+    async function dlLoadHistory() {
+        try {
+            const res = await fetch('/api/dl/history');
+            const d = await res.json();
+            const wrap = document.getElementById('dl-history');
+            if (!d.history.length) {
+                wrap.innerHTML = '<div class="text-muted small">Noch keine Downloads</div>';
+                return;
+            }
+            wrap.innerHTML = `<table class="table table-sm mb-0" style="table-layout:fixed;width:100%">
+                <colgroup><col style="width:35%"><col style="width:20%"><col style="width:10%"><col style="width:35%"></colgroup>
+                <thead><tr><th>Titel</th><th>Dateiname</th><th>Format</th><th>Pfad</th></tr></thead>
+                <tbody>${d.history.map(h => {
+                    const date = new Date(h.ts * 1000).toLocaleString('de-DE',
+                        {day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'});
+                    const files = h.files.join(', ');
+                    const path = `${h.dest}/${h.subdir}/`;
+                    return `<tr>
+                        <td class="text-truncate small" title="${h.title}">${h.title}</td>
+                        <td class="text-truncate small text-muted" title="${files}">${files}</td>
+                        <td class="small text-muted">${h.format}</td>
+                        <td class="text-truncate small text-muted" title="${path}">${path}<br>
+                            <span class="text-muted" style="font-size:0.7rem">${date}</span></td>
+                    </tr>`;
+                }).join('')}</tbody>
+            </table>`;
+        } catch(e) {}
+    }
+
+    async function dlClear(btn) {
+        btn.disabled = true;
+        const msg = document.getElementById('dl-msg');
+        try {
+            const res = await fetch('/api/dl/clear', {method:'POST'});
+            const d = await res.json();
+            msg.textContent = d.message || d.error;
+            msg.style.color = res.ok ? '#4caf50' : '#ff4444';
+            dlLoadStatus();
+        } catch(e) {}
+        btn.disabled = false;
+    }
+
+    async function dlLoadStatus() {
+        try {
+            const res = await fetch('/api/dl/status');
+            const d = await res.json();
+            const wrap = document.getElementById('dl-jobs');
+            if (!d.jobs.length) {
+                wrap.innerHTML = '<div class="text-muted small">Keine Downloads</div>';
+                return;
+            }
+            wrap.innerHTML = d.jobs.map(j => {
+                const pct = j.status === 'done' ? 100
+                    : j.status === 'error' ? 100
+                    : parseInt(j.progress) || 0;
+                const barColor = j.status === 'done' ? '#2e7d32'
+                    : j.status === 'error' ? '#c62828' : '#1976d2';
+                const statusBadge = {
+                    queued:      '<span class="badge bg-secondary">Wartend</span>',
+                    downloading: '<span class="badge bg-primary">Lädt…</span>',
+                    processing:  '<span class="badge bg-primary">Verarbeite…</span>',
+                    done:        '<span class="badge bg-success">Fertig</span>',
+                    error:       '<span class="badge bg-danger">Fehler</span>',
+                }[j.status] || '';
+                const sizeStr = j.size ? ` · ${j.size}` : '';
+                const detail = j.status === 'downloading'
+                    ? `<span class="text-muted small ms-2">${j.speed}${sizeStr} — ETA ${j.eta}</span>`
+                    : j.status === 'error'
+                    ? `<span class="text-danger small ms-2">${j.error}</span>`
+                    : j.status === 'done' && j.filename
+                    ? `<span class="text-success small ms-2">→ ${j.subdir}/${j.filename}</span>`
+                    : '';
+                return `<div class="card mb-2">
+                    <div class="card-body py-2">
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            ${statusBadge}
+                            <span class="small text-truncate flex-grow-1" title="${j.url}">${j.title}</span>
+                            <span class="small text-muted">${j.format} → ${j.dest.split('/').pop()}</span>
+                            ${detail}
+                        </div>
+                        <div style="background:#33383f;border-radius:3px;height:5px">
+                            <div style="width:${pct}%;height:5px;background:${barColor};border-radius:3px;transition:width .5s"></div>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+        } catch(e) {}
+    }
+
+    // File Manager
+    const FM = {
+        left:  { host: 'pi',  path: '/opt/server', files: [], sel: new Set() },
+        right: { host: 'nas', path: '/mnt/nas-backup', files: [], sel: new Set() },
+        active: 'left',
+        initialized: false,
+    };
+
+    const FM_ICONS = {
+        dir: '📁', link: '🔗',
+        py:'🐍', js:'📜', sh:'⚙', yml:'⚙', yaml:'⚙', json:'⚙', conf:'⚙', ini:'⚙', env:'⚙',
+        txt:'📄', md:'📄', log:'📋', csv:'📋',
+        tar:'📦', gz:'📦', zip:'📦', bz2:'📦', xz:'📦',
+        jpg:'🖼', jpeg:'🖼', png:'🖼', gif:'🖼', svg:'🖼',
+        pdf:'📕', sql:'🗄', db:'🗄',
+    };
+
+    function fmIcon(e) {
+        if (e.is_dir) return FM_ICONS.dir;
+        if (e.is_link) return FM_ICONS.link;
+        const ext = e.name.split('.').pop().toLowerCase();
+        return FM_ICONS[ext] || '📄';
+    }
+
+    function fmFmtDate(ts) {
+        return new Date(ts * 1000).toLocaleString('de-DE', {
+            day:'2-digit', month:'2-digit', year:'2-digit',
+            hour:'2-digit', minute:'2-digit'
+        });
+    }
+
+    function fmMsg(txt, color) {
+        const el = document.getElementById('fm-msg');
+        el.textContent = txt;
+        el.style.color = color || '#c9cdd4';
+        if (txt) setTimeout(() => { if (el.textContent === txt) el.textContent = ''; }, 4000);
+    }
+
+    function fmActivate(side) {
+        FM.active = side;
+        document.getElementById('fm-left').style.outline  = side === 'left'  ? '2px solid #1976d2' : 'none';
+        document.getElementById('fm-right').style.outline = side === 'right' ? '2px solid #1976d2' : 'none';
+    }
+
+    async function fmLoad(side) {
+        const s = FM[side];
+        const tbody = document.getElementById(`fm-${side}-tbody`);
+        const info  = document.getElementById(`fm-${side}-info`);
+        document.getElementById(`fm-${side}-path`).textContent = s.path;
+        tbody.innerHTML = '<tr><td colspan="3" class="text-muted small">Lade…</td></tr>';
+        try {
+            const res = await fetch(`/api/fm/list?host=${s.host}&path=${encodeURIComponent(s.path)}`);
+            const d = await res.json();
+            if (d.error) {
+                tbody.innerHTML = `<tr><td colspan="3" class="text-danger small">${d.error}</td></tr>`;
+                info.textContent = 'Fehler';
+                return;
+            }
+            s.path = d.path;
+            s.files = d.entries;
+            s.sel.clear();
+            document.getElementById(`fm-${side}-path`).textContent = s.path;
+            fmRender(side);
+            const dirs = s.files.filter(e => e.is_dir).length;
+            const files = s.files.length - dirs;
+            info.textContent = `${dirs} Ordner, ${files} Dateien`;
+        } catch(e) {
+            tbody.innerHTML = `<tr><td colspan="3" class="text-danger small">Fehler: ${e}</td></tr>`;
+        }
+    }
+
+    function fmRender(side) {
+        const s = FM[side];
+        const tbody = document.getElementById(`fm-${side}-tbody`);
+        if (!s.files.length) {
+            tbody.innerHTML = '<tr><td colspan="3" class="text-muted small">(leer)</td></tr>';
+            return;
+        }
+        tbody.innerHTML = s.files.map(e => {
+            const sel = s.sel.has(e.name) ? ' fm-selected' : '';
+            const icon = fmIcon(e);
+            const size = e.is_dir ? '<span class="text-muted">—</span>' : `<span class="text-muted small">${e.size_fmt}</span>`;
+            const date = `<span class="text-muted small">${fmFmtDate(e.mtime)}</span>`;
+            return `<tr class="fm-row${sel}" onclick="fmClick('${side}','${e.name.replace(/'/g,"\\'")}',event)"
+                ondblclick="fmDblClick('${side}','${e.name.replace(/'/g,"\\'")}',${e.is_dir})">
+                <td><span class="fm-icon">${icon}</span><span class="fm-name" title="${e.name}">${e.name}</span></td>
+                <td>${size}</td>
+                <td>${date}</td>
+            </tr>`;
+        }).join('');
+    }
+
+    function fmClick(side, name, event) {
+        event.stopPropagation();
+        fmActivate(side);
+        const s = FM[side];
+        if (event.ctrlKey || event.metaKey) {
+            if (s.sel.has(name)) s.sel.delete(name); else s.sel.add(name);
+        } else {
+            s.sel.clear();
+            s.sel.add(name);
+        }
+        fmRender(side);
+        const info = document.getElementById(`fm-${side}-info`);
+        const sel = s.sel.size;
+        const dirs = s.files.filter(e => e.is_dir).length;
+        const files = s.files.length - dirs;
+        info.textContent = sel > 0
+            ? `${sel} ausgewählt von ${s.files.length}`
+            : `${dirs} Ordner, ${files} Dateien`;
+    }
+
+    function fmDblClick(side, name, isDir) {
+        if (isDir) {
+            FM[side].path = FM[side].path.replace(/\/+$/, '') + '/' + name;
+            FM[side].sel.clear();
+            fmLoad(side);
+        }
+    }
+
+    function fmUp(side) {
+        const s = FM[side];
+        const root = s.host === 'nas' ? '/mnt/nas-backup' : '/';
+        if (s.path === root) return;
+        s.path = s.path.replace(/\/[^/]+\/?$/, '') || root;
+        s.sel.clear();
+        fmLoad(side);
+    }
+
+    function fmSetHost(side, host) {
+        FM[side].host = host;
+        FM[side].path = host === 'nas' ? '/mnt/nas-backup' : '/opt/server';
+        FM[side].sel.clear();
+        fmLoad(side);
+    }
+
+    function fmInit() {
+        if (FM.initialized) return;
+        FM.initialized = true;
+        fmActivate('left');
+        fmLoad('left');
+        fmLoad('right');
+    }
+
+    function fmActiveSide() { return FM.active; }
+
+    async function fmMkdir() {
+        const side = fmActiveSide();
+        const name = prompt('Ordner-Name:');
+        if (!name) return;
+        const s = FM[side];
+        try {
+            const res = await fetch('/api/fm/mkdir', {
+                method:'POST', headers:{'Content-Type':'application/json'},
+                body: JSON.stringify({host: s.host, path: s.path, name})
+            });
+            const d = await res.json();
+            fmMsg(d.message || d.error, res.ok ? '#4caf50' : '#ff4444');
+            if (res.ok) fmLoad(side);
+        } catch(e) { fmMsg('Fehler', '#ff4444'); }
+    }
+
+    async function fmRename() {
+        const side = fmActiveSide();
+        const s = FM[side];
+        if (s.sel.size !== 1) { fmMsg('Genau 1 Element auswählen', '#ffa726'); return; }
+        const old_name = [...s.sel][0];
+        const new_name = prompt('Neuer Name:', old_name);
+        if (!new_name || new_name === old_name) return;
+        try {
+            const res = await fetch('/api/fm/rename', {
+                method:'POST', headers:{'Content-Type':'application/json'},
+                body: JSON.stringify({host: s.host, path: s.path, old_name, new_name})
+            });
+            const d = await res.json();
+            fmMsg(d.message || d.error, res.ok ? '#4caf50' : '#ff4444');
+            if (res.ok) { s.sel.clear(); fmLoad(side); }
+        } catch(e) { fmMsg('Fehler', '#ff4444'); }
+    }
+
+    async function fmDelete() {
+        const side = fmActiveSide();
+        const s = FM[side];
+        if (!s.sel.size) { fmMsg('Nichts ausgewählt', '#ffa726'); return; }
+        const names = [...s.sel];
+        if (!confirm(`${names.length} Element(e) wirklich löschen?\n${names.join('\n')}`)) return;
+        try {
+            const res = await fetch('/api/fm/delete', {
+                method:'POST', headers:{'Content-Type':'application/json'},
+                body: JSON.stringify({host: s.host, path: s.path, names})
+            });
+            const d = await res.json();
+            fmMsg(d.message || d.error, res.ok ? '#4caf50' : '#ff4444');
+            if (res.ok) { s.sel.clear(); fmLoad(side); }
+        } catch(e) { fmMsg('Fehler', '#ff4444'); }
+    }
+
+    function fmDownload() {
+        const side = fmActiveSide();
+        const s = FM[side];
+        if (s.sel.size !== 1) { fmMsg('Genau 1 Datei auswählen', '#ffa726'); return; }
+        const name = [...s.sel][0];
+        const entry = s.files.find(e => e.name === name);
+        if (!entry || entry.is_dir) { fmMsg('Nur Dateien downloadbar', '#ffa726'); return; }
+        window.location.href = `/api/fm/download?host=${s.host}&path=${encodeURIComponent(s.path)}&name=${encodeURIComponent(name)}`;
+    }
+
+    async function fmTransfer(op, fromSide, toSide) {
+        const src = FM[fromSide];
+        const dst = FM[toSide];
+        if (!src.sel.size) { fmMsg(`Nichts in ${fromSide === 'left' ? 'links' : 'rechts'} ausgewählt`, '#ffa726'); return; }
+        const names = [...src.sel];
+        const verb = op === 'copy' ? 'Kopieren' : 'Verschieben';
+        if (!confirm(`${names.length} Element(e) ${verb}?\n${src.path} → ${dst.path}`)) return;
+        try {
+            const res = await fetch('/api/fm/transfer', {
+                method:'POST', headers:{'Content-Type':'application/json'},
+                body: JSON.stringify({op, src_host: src.host, src_path: src.path, dst_host: dst.host, dst_path: dst.path, names})
+            });
+            const d = await res.json();
+            fmMsg(d.message || d.error, res.ok ? '#4caf50' : '#ff4444');
+            if (res.ok) { src.sel.clear(); fmLoad(fromSide); fmLoad(toSide); }
+        } catch(e) { fmMsg('Fehler', '#ff4444'); }
+    }
+
+    // WireGuard
+    async function loadWgStatus(btn) {
+        const badge = document.getElementById('wg-status-badge');
+        const ifaceInfo = document.getElementById('wg-iface-info');
+        const peersCard = document.getElementById('wg-peers-card');
+        const newCard = document.getElementById('wg-newclient-card');
+        badge.innerHTML = '<span class="text-muted small">Lade…</span>';
+        try {
+            const res = await fetch('/api/wireguard/status');
+            const d = await res.json();
+            if (!d.installed) {
+                badge.innerHTML = '<span class="badge bg-secondary">wg nicht installiert</span>';
+                peersCard.style.display = 'none';
+                newCard.style.display = 'none';
+                return;
+            }
+            if (!d.up) {
+                badge.innerHTML = '<span class="badge bg-danger">Interface down</span>';
+                ifaceInfo.textContent = d.error || '';
+                peersCard.style.display = 'none';
+                newCard.style.display = 'none';
+                return;
+            }
+            badge.innerHTML = '<span class="badge bg-success">wg0 aktiv</span>';
+            const iface = d.interface || {};
+            const parts = [];
+            if (iface['public key']) parts.push(`PubKey: ${iface['public key'].substring(0,12)}…`);
+            if (iface['listening port']) parts.push(`Port: ${iface['listening port']}`);
+            ifaceInfo.textContent = parts.join('  |  ');
+            peersCard.style.display = '';
+            newCard.style.display = '';
+            renderWgPeers(d.peers || []);
+        } catch(e) {
+            badge.innerHTML = '<span class="badge bg-danger">Fehler</span>';
+        }
+    }
+
+    function fmtBytes(b) {
+        const n = parseInt(b) || 0;
+        if (n >= 1073741824) return (n/1073741824).toFixed(1) + ' GiB';
+        if (n >= 1048576)    return (n/1048576).toFixed(1) + ' MiB';
+        if (n >= 1024)       return (n/1024).toFixed(1) + ' KiB';
+        return n + ' B';
+    }
+
+    function renderWgPeers(peers) {
+        const tbody = document.getElementById('wg-peers-tbody');
+        if (!peers.length) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-muted small">Keine Peers</td></tr>';
+            return;
+        }
+        tbody.innerHTML = peers.map(p => {
+            const badge = p.active
+                ? '<span class="badge bg-success">Online</span>'
+                : '<span class="badge bg-secondary">Offline</span>';
+            const shortKey = p.pubkey ? p.pubkey.substring(0, 14) + '…' : '—';
+            const transfer = (p.rx || p.tx)
+                ? `${fmtBytes(p.rx)} / ${fmtBytes(p.tx)}`
+                : '—';
+            const removeBtn = `<button class="btn-orange" style="font-size:0.75rem;padding:0.15rem 0.5rem"
+                onclick="wgRemovePeer('${p.pubkey}',this)">✕</button>`;
+            return `<tr>
+                <td>${badge}</td>
+                <td class="text-truncate small" title="${p.pubkey}">${shortKey}</td>
+                <td class="small text-muted">${p.allowed_ips || '—'}</td>
+                <td class="small" style="color:${p.active ? '#4caf50' : '#c9cdd4'}">${p.handshake}</td>
+                <td class="small text-muted">${transfer}</td>
+                <td>${removeBtn}</td>
+            </tr>`;
+        }).join('');
+    }
+
+    async function wgNewClient(btn) {
+        const name = document.getElementById('wg-new-name').value.trim() || 'client';
+        const ip_last = document.getElementById('wg-new-ip').value.trim();
+        const msg = document.getElementById('wg-new-msg');
+        const result = document.getElementById('wg-new-result');
+        if (!ip_last) { msg.textContent = 'Bitte IP eingeben'; msg.style.color='#ff4444'; return; }
+        btn.disabled = true; btn.textContent = 'Erstelle…';
+        msg.textContent = ''; result.innerHTML = '';
+        try {
+            const res = await fetch('/api/wireguard/new-client', {
+                method: 'POST', headers: {'Content-Type':'application/json'},
+                body: JSON.stringify({name, ip_last: parseInt(ip_last)})
+            });
+            const d = await res.json();
+            if (d.error) { msg.textContent = d.error; msg.style.color='#ff4444'; }
+            else {
+                if (d.vps_warning) { msg.textContent = '⚠ ' + d.vps_warning; msg.style.color='#ffa726'; }
+                else { msg.textContent = `✓ Peer auf VPS eingetragen (${d.ip})`; msg.style.color='#4caf50'; }
+                const qrImg = d.qr ? `<img src="data:image/png;base64,${d.qr}" style="width:180px;height:180px;border-radius:4px;display:block;margin-bottom:0.5rem">` : '';
+                result.innerHTML = `<div class="row g-3 align-items-start">
+                    <div class="col-auto">${qrImg}</div>
+                    <div class="col">
+                        <div class="small text-muted mb-1">Konfiguration für <strong>${d.name}</strong> (${d.ip})</div>
+                        <pre class="small p-2 rounded mb-2" style="background:#111;white-space:pre-wrap;font-size:0.78rem">${d.config}</pre>
+                        <button class="btn-orange" onclick="navigator.clipboard.writeText(${JSON.stringify(d.config)}).then(()=>this.textContent='Kopiert!',()=>{})">Kopieren</button>
+                    </div>
+                </div>`;
+                loadWgStatus();
+            }
+        } catch(e) { msg.textContent = 'Fehler: ' + e; msg.style.color='#ff4444'; }
+        btn.disabled = false; btn.textContent = 'Erstellen';
+    }
+
+    async function wgRemovePeer(pubkey, btn) {
+        if (!confirm('Peer wirklich entfernen?')) return;
+        btn.disabled = true; btn.textContent = '…';
+        try {
+            const res = await fetch('/api/wireguard/remove-peer', {
+                method: 'POST', headers: {'Content-Type':'application/json'},
+                body: JSON.stringify({pubkey})
+            });
+            const d = await res.json();
+            const msg = document.createElement('span');
+            msg.className = 'small ms-2';
+            msg.textContent = d.message || d.error;
+            msg.style.color = res.ok ? '#4caf50' : '#ff4444';
+            btn.parentNode.appendChild(msg);
+            if (res.ok) setTimeout(() => loadWgStatus(), 1000);
+        } catch(e) {}
+        btn.disabled = false; btn.textContent = 'Entfernen';
+    }
+
+    // Fail2Ban
+    async function loadF2bStatus(btn) {
+        const badge = document.getElementById('f2b-status-badge');
+        const installWrap = document.getElementById('f2b-install-wrap');
+        const serviceBtns = document.getElementById('f2b-service-btns');
+        const startBtn = document.getElementById('f2b-start-btn');
+        const jailsWrap = document.getElementById('f2b-jails-wrap');
+        const logsWrap = document.getElementById('f2b-logs-wrap');
+        badge.innerHTML = '<span class="text-muted small">Lade…</span>';
+        try {
+            const res = await fetch('/api/fail2ban/status');
+            const d = await res.json();
+            if (!d.installed) {
+                badge.innerHTML = '<span class="badge bg-secondary">Nicht installiert</span>';
+                installWrap.style.display = '';
+                serviceBtns.style.display = 'none';
+                startBtn.style.display = 'none';
+                jailsWrap.style.display = 'none';
+                logsWrap.style.display = 'none';
+                return;
+            }
+            installWrap.style.display = 'none';
+            logsWrap.style.display = '';
+            if (d.running) {
+                badge.innerHTML = '<span class="badge bg-success">Aktiv</span>';
+                serviceBtns.style.display = '';
+                startBtn.style.display = 'none';
+                jailsWrap.style.display = '';
+                renderJails(d.jails);
+            } else {
+                badge.innerHTML = '<span class="badge bg-danger">Gestoppt</span>';
+                serviceBtns.style.display = 'none';
+                startBtn.style.display = '';
+                jailsWrap.style.display = 'none';
+            }
+        } catch(e) {
+            badge.innerHTML = '<span class="badge bg-danger">Fehler</span>';
+        }
+    }
+
+    function renderJails(jails) {
+        const wrap = document.getElementById('f2b-jails');
+        if (!jails.length) {
+            wrap.innerHTML = '<div class="text-muted small">Keine Jails aktiv</div>';
+            return;
+        }
+        wrap.innerHTML = jails.map(j => {
+            const rows = j.banned_ips.length
+                ? j.banned_ips.map(ip =>
+                    `<tr><td><code>${ip}</code></td><td>
+                        <button class="btn-orange" onclick="f2bUnban('${ip}','${j.name}',this)">Entsperren</button>
+                    </td></tr>`).join('')
+                : '<tr><td colspan="2" class="text-muted small">Keine gesperrten IPs</td></tr>';
+            return `<div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title mb-1">${j.name}</h5>
+                    <div class="small text-muted mb-2">
+                        Aktuell gesperrt: <strong>${j.currently_banned}</strong> &nbsp;|&nbsp;
+                        Gesamt gesperrt: <strong>${j.total_banned}</strong> &nbsp;|&nbsp;
+                        Fehlversuche: <strong>${j.total_failed}</strong>
+                    </div>
+                    <table class="table table-sm mb-0" style="table-layout:fixed;width:100%">
+                        <colgroup><col style="width:75%"><col style="width:25%"></colgroup>
+                        <thead><tr><th>IP</th><th></th></tr></thead>
+                        <tbody>${rows}</tbody>
+                    </table>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    async function f2bInstall(btn) {
+        if (!confirm('Fail2Ban jetzt installieren? (benötigt sudo apt-get)')) return;
+        btn.disabled = true; btn.textContent = 'Installiere…';
+        const msg = document.getElementById('f2b-msg');
+        msg.textContent = 'Installation läuft…'; msg.style.color = '#ffa726';
+        try {
+            const res = await fetch('/api/fail2ban/install', {method: 'POST'});
+            const d = await res.json();
+            if (d.error) { msg.textContent = d.error; msg.style.color = '#ff4444'; }
+            else { msg.textContent = d.message; msg.style.color = '#4caf50'; loadF2bStatus(); }
+        } catch(e) { msg.textContent = 'Fehler'; msg.style.color = '#ff4444'; }
+        btn.disabled = false; btn.textContent = 'Fail2Ban installieren';
+    }
+
+    async function f2bService(action, btn) {
+        btn.disabled = true;
+        const msg = document.getElementById('f2b-msg');
+        msg.textContent = `${action}…`; msg.style.color = '#ffa726';
+        try {
+            const res = await fetch('/api/fail2ban/service', {
+                method: 'POST', headers: {'Content-Type':'application/json'},
+                body: JSON.stringify({action})
+            });
+            const d = await res.json();
+            msg.textContent = d.returncode === 0 ? `${action} OK` : (d.output || 'Fehler');
+            msg.style.color = d.returncode === 0 ? '#4caf50' : '#ff4444';
+            setTimeout(() => loadF2bStatus(), 1500);
+        } catch(e) { msg.textContent = 'Fehler'; msg.style.color = '#ff4444'; }
+        btn.disabled = false;
+    }
+
+    async function f2bUnban(ip, jail, btn) {
+        btn.disabled = true; btn.textContent = '…';
+        const msg = document.getElementById('f2b-msg');
+        try {
+            const res = await fetch('/api/fail2ban/unban', {
+                method: 'POST', headers: {'Content-Type':'application/json'},
+                body: JSON.stringify({ip, jail})
+            });
+            const d = await res.json();
+            msg.textContent = d.message || d.error;
+            msg.style.color = res.ok ? '#4caf50' : '#ff4444';
+            if (res.ok) setTimeout(() => loadF2bStatus(), 800);
+        } catch(e) { msg.textContent = 'Fehler'; msg.style.color = '#ff4444'; }
+        btn.disabled = false; btn.textContent = 'Entsperren';
+    }
+
+    async function loadF2bLogs(btn) {
+        btn.disabled = true; btn.textContent = 'Lade…';
+        const out = document.getElementById('f2b-log-out');
+        try {
+            const res = await fetch('/api/fail2ban/logs');
+            const d = await res.json();
+            out.textContent = d.logs || d.error || '(leer)';
+            out.scrollTop = out.scrollHeight;
+        } catch(e) { out.textContent = 'Fehler beim Laden'; }
+        btn.disabled = false; btn.textContent = 'Laden';
+    }
+
+    async function runWatchtower(btn) {
+        if (!confirm('Watchtower jetzt ausführen? (sucht und aktualisiert alle Container)')) return;
+        btn.disabled = true;
+        btn.textContent = 'Läuft…';
+        const msg = document.getElementById('watchtower-msg');
+        msg.textContent = 'Watchtower läuft…'; msg.style.color = '#ffa726';
+        const logBox = document.getElementById('container-log-box');
+        const logOut = document.getElementById('container-log-output');
+        logBox.style.display = 'block';
+        logOut.textContent = 'Watchtower wird ausgeführt (kann ~2 Min dauern)…';
+        try {
+            const res = await fetch('/api/system/watchtower-run', {method: 'POST'});
+            const d = await res.json();
+            if (d.error) {
+                msg.textContent = d.error; msg.style.color = '#ff4444';
+                logOut.textContent = d.error;
+            } else {
+                msg.textContent = d.returncode === 0 ? 'Fertig' : 'Beendet mit Fehlern';
+                msg.style.color = d.returncode === 0 ? '#4caf50' : '#ff4444';
+                logOut.textContent = d.output || '(keine Ausgabe)';
+            }
+        } catch(e) { msg.textContent = 'Fehler'; msg.style.color = '#ff4444'; logOut.textContent = 'Fehler: ' + e; }
+        btn.disabled = false;
+        btn.textContent = 'Watchtower jetzt';
+        setTimeout(() => loadContainers(), 2000);
+    }
+
+    // Systemmetriken
+    let _metTimer = null;
+
+    function metricsInit() {
+        metricsRefresh();
+        if (_metTimer) clearInterval(_metTimer);
+        _metTimer = setInterval(metricsRefresh, 5000);
+    }
+
+    async function metricsRefresh() {
+        try {
+            const [sys, ctr] = await Promise.all([
+                fetch('/api/metrics/system').then(r => r.json()),
+                fetch('/api/metrics/containers').then(r => r.json()),
+            ]);
+            _renderSys(sys);
+            _renderContainers(ctr);
+        } catch(e) {}
+    }
+
+    function _bar(pct, id, color) {
+        const el = document.getElementById(id);
+        if (el) el.style.width = Math.min(pct, 100) + '%';
+        if (el && color) el.style.background = color;
+    }
+
+    function _cpuColor(p) {
+        if (p >= 80) return '#f44336';
+        if (p >= 60) return '#ff9800';
+        return '#4caf50';
+    }
+
+    function _renderSys(d) {
+        // CPU
+        const cpu = d.cpu_pct;
+        document.getElementById('met-cpu-pct').textContent = cpu !== null ? cpu + '%' : '—';
+        document.getElementById('met-cpu-cores').textContent = d.cpu_cores ? d.cpu_cores + ' Kerne' : '';
+        _bar(cpu || 0, 'met-cpu-bar', _cpuColor(cpu || 0));
+
+        // Temp
+        const tempEl = document.getElementById('met-temp');
+        if (d.temp !== null && d.temp !== undefined) {
+            const t = d.temp;
+            tempEl.textContent = t + ' °C';
+            tempEl.style.color = t >= 70 ? '#f44336' : t >= 55 ? '#ff9800' : '#4caf50';
+        } else { tempEl.textContent = '—'; }
+
+        // Load
+        const load = d.load || {};
+        document.getElementById('met-load').innerHTML = load.load1 !== undefined
+            ? `<span class="me-3">1 Min: <strong>${load.load1}</strong></span>`
+            + `<span class="me-3">5 Min: <strong>${load.load5}</strong></span>`
+            + `<span>15 Min: <strong>${load.load15}</strong></span>`
+            : '—';
+
+        // RAM
+        const m = d.mem || {};
+        if (m.mem_total_mb) {
+            document.getElementById('met-mem-used').textContent =
+                `${m.mem_used_mb} MB / ${m.mem_total_mb} MB`;
+            document.getElementById('met-mem-pct').textContent = m.mem_pct + '%';
+            _bar(m.mem_pct, 'met-mem-bar',
+                m.mem_pct >= 85 ? '#f44336' : m.mem_pct >= 65 ? '#ff9800' : '#2196f3');
+        }
+        if (m.swap_total_mb !== undefined) {
+            document.getElementById('met-swap-used').textContent =
+                `${m.swap_used_mb} MB / ${m.swap_total_mb} MB`;
+            document.getElementById('met-swap-pct').textContent = m.swap_pct + '%';
+            _bar(m.swap_pct, 'met-swap-bar');
+        }
+
+        // Disks
+        const disks = d.disks || [];
+        document.getElementById('met-disks').innerHTML = disks.length === 0 ? '—' :
+            disks.map(dk => `<div class="mb-2">
+                <div class="d-flex justify-content-between mb-1">
+                    <span class="text-muted">${dk.mount}</span>
+                    <span>${dk.used} / ${dk.size} <span class="text-muted">(${dk.pct}%)</span></span>
+                </div>
+                <div style="background:#33383f;border-radius:2px;height:5px">
+                    <div style="width:${dk.pct}%;height:5px;background:${dk.pct>=85?'#f44336':dk.pct>=65?'#ff9800':'#4caf50'};border-radius:2px"></div>
+                </div>
+            </div>`).join('');
+
+        // Net
+        const ifaces = d.net || [];
+        document.getElementById('met-net').innerHTML = ifaces.length === 0 ? '—' :
+            `<table class="table table-sm mb-0"><thead><tr>
+                <th>Interface</th><th>RX</th><th>TX</th>
+            </tr></thead><tbody>` +
+            ifaces.map(i => `<tr><td>${i.iface}</td><td>${i.rx}</td><td>${i.tx}</td></tr>`).join('') +
+            '</tbody></table>';
+    }
+
+    function _renderContainers(d) {
+        const ctrs = d.containers || [];
+        document.getElementById('met-containers').innerHTML = ctrs.length === 0
+            ? '<span class="text-muted">Keine Container</span>'
+            : `<table class="table table-sm mb-0"><thead><tr>
+                <th>Name</th><th>CPU %</th><th>RAM</th><th>RAM %</th><th>Net I/O</th>
+            </tr></thead><tbody>` +
+            ctrs.map(c => `<tr>
+                <td>${c.name}</td>
+                <td><span style="color:${c.cpu_pct>=50?'#f44336':c.cpu_pct>=20?'#ff9800':'#4caf50'}">${c.cpu_pct.toFixed(1)}%</span></td>
+                <td>${c.mem}</td>
+                <td>${c.mem_pct.toFixed(1)}%</td>
+                <td class="text-muted">${c.net_io}</td>
+            </tr>`).join('') +
+            '</tbody></table>';
+    }
+</script>
+</body>
+</html>

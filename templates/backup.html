@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="de" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <title>Backup & Restore</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/css/styles.css" rel="stylesheet">
+</head>
+<body class="p-4">
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Backup & Restore</h2>
+    <a href="{{ url_for('dashboard.dashboard') }}" class="btn btn-secondary">← Dashboard</a>
+</div>
+
+<!-- NAS Status -->
+<div class="alert {% if mount_ok %}alert-success{% else %}alert-danger{% endif %} py-2 mb-4">
+    NAS Mount: {% if mount_ok %}<strong>Verbunden</strong> (/mnt/nas-backup){% else %}<strong>Nicht verbunden</strong> — Backup nicht möglich{% endif %}
+</div>
+
+<!-- Pi Jobs -->
+<div class="card mb-4">
+    <div class="card-body">
+        <h5 class="card-title">Pi Backup-Jobs</h5>
+        <table class="table table-sm">
+            <thead>
+                <tr><th>Job</th><th>Letzter Lauf</th><th>Aktion</th></tr>
+            </thead>
+            <tbody>
+                {% for job in jobs %}
+                <tr id="row-{{ job.name }}">
+                    <td>
+                        {% if job.exists %}
+                        <span class="badge bg-success">✓</span>
+                        {% else %}
+                        <span class="badge bg-danger">!</span>
+                        {% endif %}
+                        {{ job.name }}
+                    </td>
+                    <td><small class="text-muted">{{ job.last_log }}</small></td>
+                    <td>
+                        <button class="btn btn-primary btn-sm"
+                            onclick="runJob('{{ job.name }}')"
+                            {% if not mount_ok or not job.exists %}disabled{% endif %}>
+                            Jetzt starten
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Log Ausgabe -->
+<div id="logBox" class="card" style="display:none;">
+    <div class="card-body">
+        <h5 class="card-title">Ausgabe</h5>
+        <pre id="logOutput" class="small p-3 rounded" style="background:#0d1a0d; white-space: pre-wrap; max-height: 300px; overflow-y: auto;"></pre>
+    </div>
+</div>
+
+<script>
+async function runJob(name) {
+    const btn = document.querySelector(`#row-${name.replace(/-/g, '\\-')} button`);
+    btn.disabled = true;
+    btn.textContent = 'Läuft…';
+
+    document.getElementById('logBox').style.display = 'block';
+    document.getElementById('logOutput').textContent = `Starte ${name}…`;
+
+    const res = await fetch(`/backup/run/${name}`, { method: 'POST' });
+    const data = await res.json();
+
+    if (data.error) {
+        document.getElementById('logOutput').textContent = 'Fehler: ' + data.error;
+    } else {
+        document.getElementById('logOutput').textContent =
+            (data.stdout || '') + (data.stderr ? '\nSTDERR:\n' + data.stderr : '');
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'Jetzt starten';
+    location.reload();
+}
+</script>
+</body>
+</html>

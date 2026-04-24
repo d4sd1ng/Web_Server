@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="de" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mounts</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/css/styles.css" rel="stylesheet">
+</head>
+<body class="p-4">
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Mounts</h2>
+    <a href="{{ url_for('dashboard.dashboard') }}" class="btn btn-secondary">← Dashboard</a>
+</div>
+<div class="card mb-4">
+    <div class="card-body">
+        <h5 class="card-title">Mount hinzufügen</h5>
+        <form id="mount-form" method="post" action="/mounts/add" class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label">Plattform</label>
+                <select class="form-select" name="platform" required>
+                    <option value="linux">Linux</option>
+                    <option value="windows">Windows</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Gerät</label>
+                <input type="text" class="form-control" name="device" required placeholder="//192.168.178.51/share">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Mount-Punkt</label>
+                <input type="text" class="form-control" name="mount_point" required placeholder="/mnt/nas">
+            </div>
+            <div class="col-md-1 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100">+</button>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">Vorhandene Mounts</h5>
+        <ul class="list-group">
+            {% for mount in mounts %}
+            <li class="list-group-item d-flex justify-content-between">
+                <span><strong>{{ mount.platform }}</strong> — {{ mount.device }} → {{ mount.mount_point }}</span>
+            </li>
+            {% else %}
+            <li class="list-group-item text-muted">Keine Mounts konfiguriert</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+</body>
+</html>

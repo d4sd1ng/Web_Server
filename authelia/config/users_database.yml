@@ -1,0 +1,19 @@
+# yamllint disable rule:line-length
+---
+###############################################################
+#                         Users Database                      #
+###############################################################
+
+# This file can be used if you do not have an LDAP set up.
+
+users:
+  d4sd1ng:
+    disabled: false
+    displayname: "d4sd1ng"
+    password: "$argon2id$v=19$m=65536,t=3,p=4$OmvGrIPnSQFdm+wiI9pL8A$M0UjOQRrpe4jtNW/xoRhpapDZJzUaPT4tdAbnVlqPJk"
+    email: d4sd1ng@gmnx.de
+    groups:
+      - admins
+      - dev
+...
+# yamllint enable rule:line-length

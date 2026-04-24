@@ -16,11 +16,14 @@ entryPoints:
           scheme: https
   websecure:
     address: ":443"
+  traefik:
+    address: ":8080"
+  metrics:
+    address: ":8082"
 
 providers:
   docker:
     watch: true
-    useBindPortIP: true
     endpoint: "unix:///var/run/docker.sock"
     exposedByDefault: false
     network: server
@@ -33,7 +36,17 @@ certificatesResolvers:
     acme:
       email: t.schneiderx@yahoo.de
       storage: /letsencrypt/acme.json
+      
       dnsChallenge:
         provider: cloudflare
+        propagation:
+          delayBeforeChecks: 30
+
+metrics:
+  prometheus:
+    entryPoint: metrics
+    addRoutersLabels: true
+    addServicesLabels: true
+    addEntryPointsLabels: true
 
 accessLog: {}

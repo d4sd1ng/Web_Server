@@ -5,7 +5,26 @@ http:
       entryPoints:
         - websecure
       service: adguard-svc
-      tls: {}
+      middlewares:
+        - authelia
+      tls:
+        certResolver: cloudflare
+        domains:
+          - main: "internal.avataryx.de"
+            sans:
+              - "*.internal.avataryx.de"
+
+  middlewares:
+    authelia:
+      forwardAuth:
+        address: "http://authelia:9091/api/authz/forward-auth"
+        trustForwardHeader: true
+        authResponseHeaders:
+          - "Remote-User"
+          - "Remote-Groups"
+          - "Remote-Name"
+          - "Remote-Email"
+        maxResponseBodySize: 1048576
 
   services:
     adguard-svc:

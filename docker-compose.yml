@@ -3,10 +3,13 @@ services:
     image: traefik:v3.6
     container_name: traefik
     restart: unless-stopped
-    mem_limit: 512m
-    cpus: "1.00"
+    mem_limit: 192m
+    cpus: "0.50"
     env_file:
       - /opt/server/.env
+    dns:
+      - 1.1.1.1
+      - 9.9.9.9
     environment:
       - CF_API_EMAIL=${CF_API_EMAIL}
       - CF_DNS_API_TOKEN=${CLOUDFLARE_ZONE_API_TOKEN}
@@ -14,6 +17,7 @@ services:
       - "80:80"
       - "443:443"
       - "8080:8080"
+      - "8082:8082"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - /opt/server/traefik/traefik.yml:/traefik.yml:ro
@@ -23,17 +27,27 @@ services:
     networks:
       - proxy
     command:
-      - --configfile=traefik.yml
+      - --configfile=/traefik.yml
+      - --certificatesresolvers.cloudflare.acme.email=t.schneiderx@yahoo.de
+      - --certificatesresolvers.cloudflare.acme.storage=/letsencrypt/acme.json
+      - --certificatesresolvers.cloudflare.acme.dnschallenge=true
+      - --certificatesresolvers.cloudflare.acme.dnschallenge.provider=cloudflare
+      - --certificatesresolvers.cloudflare.acme.dnschallenge.delaybeforecheck=15
+      
     labels:
       - traefik.enable=true
+      - traefik.http.routers.traefik-in.rule=Host(`traefik.internal.avataryx.de`)
+      - traefik.http.routers.traefik-in.entrypoints=websecure
+      - traefik.http.routers.traefik-in.tls=true
+      - traefik.http.routers.traefik-in.tls.certresolver=cloudflare
+      - traefik.http.routers.traefik-in.service=api@internal
+
       - traefik.http.routers.traefik.rule=Host(`${TRAEFIK_HOST}`)
       - traefik.http.routers.traefik.entrypoints=websecure
       - traefik.http.routers.traefik.tls=true
       - traefik.http.routers.traefik.tls.certresolver=cloudflare
       - traefik.http.routers.traefik.service=api@internal
-      - traefik.http.routers.traefik.middlewares=default-security@docker,traefik-auth@docker
-
-      - traefik.http.middlewares.traefik-auth.basicauth.users=${TRAEFIK_BASIC_AUTH_USERS}
+      - traefik.http.routers.traefik.middlewares=default-security@docker,authelia@file
 
       - traefik.http.middlewares.default-security.headers.browserXssFilter=true
       - traefik.http.middlewares.default-security.headers.contentTypeNosniff=true
@@ -62,8 +76,8 @@ services:
     image: vaultwarden/server:latest
     container_name: vaultwarden
     restart: unless-stopped
-    mem_limit: 512m
-    cpus: "1.00"
+    mem_limit: 128m
+    cpus: "0.25"
     environment:
       - DOMAIN=https://${VAULTWARDEN_HOST}
       - SIGNUPS_ALLOWED=false
@@ -75,63 +89,84 @@ services:
       - proxy
       - backend
     labels:
-      - traefik.enable=true
-      - traefik.http.routers.vaultwarden.rule=Host(`vault.internal.avataryx.de`)
-      - traefik.http.routers.vaultwarden.entrypoints=websecure
-      - traefik.http.routers.vaultwarden.tls=true
-      - traefik.http.routers.vaultwarden.tls.certresolver=cloudflare
-      - traefik.http.services.vaultwarden.loadbalancer.server.port=80
+      - "traefik.enable=true"
       - "traefik.docker.network=server"
+      - "traefik.http.routers.vaultwarden-in.rule=Host(`vaultwarden.internal.avataryx.de`)"
+      - "traefik.http.routers.vaultwarden-in.entrypoints=websecure"
+      - "traefik.http.routers.vaultwarden-in.tls=true"
+      - "traefik.http.routers.vaultwarden-in.tls.certresolver=cloudflare"
+      - "traefik.http.routers.vaultwarden-in.service=vaultwarden"
+      - "traefik.http.routers.vaultwarden.rule=Host(`vaultwarden.avataryx.de`)"
+      - "traefik.http.routers.vaultwarden.entrypoints=websecure"
+      - "traefik.http.routers.vaultwarden.tls=true"
+      - "traefik.http.routers.vaultwarden.tls.certresolver=cloudflare"
+      - "traefik.http.routers.vaultwarden.service=vaultwarden"
+      - "traefik.http.routers.vaultwarden.middlewares=authelia@file"
+      - "traefik.http.services.vaultwarden.loadbalancer.server.port=80"
 
   portainer:
     image: portainer/portainer-ce:latest
     container_name: portainer
     restart: unless-stopped
-    mem_limit: 512m
-    cpus: "1.00"
+    mem_limit: 128m
+    cpus: "0.25"
     command: -H unix:///var/run/docker.sock
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /opt/server/portainer/data:/data
     networks:
       - proxy
-      - backend
     labels:
-      - traefik.enable=true
-      - traefik.http.routers.portainer.rule=Host(`portainer.internal.avataryx.de`)
-      - traefik.http.routers.portainer.entrypoints=websecure
-      - traefik.http.routers.portainer.tls=true
-      - traefik.http.routers.portainer.tls.certresolver=cloudflare
-      - traefik.http.services.portainer.loadbalancer.server.port=9000
+      - "traefik.enable=true"
       - "traefik.docker.network=server"
-
+      - "traefik.http.routers.portainer-in.rule=Host(`portainer.internal.avataryx.de`)"
+      - "traefik.http.routers.portainer-in.entrypoints=websecure"
+      - "traefik.http.routers.portainer-in.tls=true"
+      - "traefik.http.routers.portainer-in.tls.certresolver=cloudflare"
+      - "traefik.http.routers.portainer-in.service=portainer"
+      - "traefik.http.routers.portainer.rule=Host(`portainer.avataryx.de`)"
+      - "traefik.http.routers.portainer.entrypoints=websecure"
+      - "traefik.http.routers.portainer.tls=true"
+      - "traefik.http.routers.portainer.tls.certresolver=cloudflare"
+      - "traefik.http.routers.portainer.service=portainer"
+      - "traefik.http.routers.portainer.middlewares=authelia@file"
+      - "traefik.http.services.portainer.loadbalancer.server.port=9000"
+          
   homer:
     image: b4bz/homer:latest
     container_name: homer
     restart: unless-stopped
-    mem_limit: 256m
-    cpus: "0.50"
+    mem_limit: 32m
+    cpus: "0.10"
     user: "1000:1000"
     volumes:
       - /opt/server/homer/assets:/www/assets
     networks:
       - proxy
     labels:
-      - traefik.enable=true
-      - traefik.http.routers.homer.rule=Host(`homer.internal.avataryx.de`)
-      - traefik.http.routers.homer.entrypoints=websecure
-      - traefik.http.routers.homer.tls=true
-      - traefik.http.routers.homer.tls.certresolver=cloudflare
-      - traefik.http.services.homer.loadbalancer.server.port=8080
+      - "traefik.enable=true"
       - "traefik.docker.network=server"
-      - com.centurylinklabs.watchtower.enable=true
+      - "com.centurylinklabs.watchtower.enable=true"
+      - "traefik.http.routers.homer-in.rule=Host(`homer.internal.avataryx.de`)"
+      - "traefik.http.routers.homer-in.entrypoints=websecure"
+      - "traefik.http.routers.homer-in.tls=true"
+      - "traefik.http.routers.homer-in.tls.certresolver=cloudflare"
+      - "traefik.http.routers.homer-in.service=homer"
+      - "traefik.http.routers.homer.rule=Host(`homer.avataryx.de`)"
+      - "traefik.http.routers.homer.entrypoints=websecure"
+      - "traefik.http.routers.homer.tls=true"
+      - "traefik.http.routers.homer.tls.certresolver=cloudflare"
+      - "traefik.http.routers.homer.service=homer"
+      - "traefik.http.routers.homer.middlewares=authelia@file"
+      - "traefik.http.services.homer.loadbalancer.server.port=8080"
+  
 
   postgres:
     image: postgres:16
     container_name: postgres
     restart: unless-stopped
-    mem_limit: 1024m
-    cpus: "1.50"
+    mem_limit: 384m
+    cpus: "1.00"
     environment:
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_USER=${POSTGRES_USER}
@@ -140,6 +175,8 @@ services:
       - /opt/server/postgres/data:/var/lib/postgresql/data
     networks:
       - backend
+    ports:
+      - "127.0.0.1:5432:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 10s
@@ -150,6 +187,8 @@ services:
     image: containrrr/watchtower:latest
     container_name: watchtower
     restart: unless-stopped
+    mem_limit: 64m
+    cpus: "0.10"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
@@ -158,27 +197,219 @@ services:
       - WATCHTOWER_INCLUDE_RESTARTING=true
       - DOCKER_API_VERSION=1.54
     command: --label-enable --monitor-only --schedule "0 0 5 * * *"
-    
-  pgladmin:
+
+  pgadmin:
     image: dpage/pgadmin4:latest
-    container_name: pgladmin
+    container_name: pgadmin
     restart: unless-stopped
+    mem_limit: 384m
+    cpus: "0.50"
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@avataryx.de
-      PGADMIN_DEFAULT_PASSWORD: ChangeThisPassword
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_USER}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
     volumes:
-      - /opt/server/pgladmin/data:/var/lib/pgladmin
+      - /opt/server/pgadmin/data:/var/lib/pgadmin
+    networks:
+      - proxy
+      - backend
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=server"
+      - "traefik.http.routers.pgadmin-in.rule=Host(`pgadmin.internal.avataryx.de`)"
+      - "traefik.http.routers.pgadmin-in.entrypoints=websecure"
+      - "traefik.http.routers.pgadmin-in.tls=true"
+      - "traefik.http.routers.pgadmin-in.tls.certresolver=cloudflare"
+      - "traefik.http.routers.pgadmin-in.service=pgadmin"
+      - "traefik.http.routers.pgadmin.rule=Host(`pgadmin.avataryx.de`)"
+      - "traefik.http.routers.pgadmin.entrypoints=websecure"
+      - "traefik.http.routers.pgadmin.tls=true"
+      - "traefik.http.routers.pgadmin.tls.certresolver=cloudflare"
+      - "traefik.http.routers.pgadmin.service=pgadmin"
+      - "traefik.http.routers.pgadmin.middlewares=authelia@file"
+      - "traefik.http.services.pgadmin.loadbalancer.server.port=80"
+
+  authelia-redis:
+    image: redis:7-alpine
+    container_name: authelia-redis
+    restart: unless-stopped
+    mem_limit: 64m
+    cpus: "0.10"
+    command: redis-server --requirepass 'Butch*20052023'
+    networks:
+      - backend
+    volumes:
+      - /opt/server/authelia/redis:/data
+      
+  authelia:
+    image: authelia/authelia:latest
+    container_name: authelia
+    restart: unless-stopped
+    mem_limit: 128m
+    cpus: "0.50"
+    env_file:
+      - /opt/server/.env
+    networks:
+      - proxy
+      - backend
+    volumes:
+      - /opt/server/authelia/config:/config
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=server"
+      - "traefik.http.routers.authelia-in.rule=Host(`auth.internal.avataryx.de`)"
+      - "traefik.http.routers.authelia-in.entrypoints=websecure"
+      - "traefik.http.routers.authelia-in.tls=true"
+      - "traefik.http.routers.authelia-in.tls.certresolver=cloudflare"
+      - "traefik.http.routers.authelia-in.service=authelia"
+      - "traefik.http.routers.authelia.rule=Host(`auth.avataryx.de`)"
+      - "traefik.http.routers.authelia.entrypoints=websecure"
+      - "traefik.http.routers.authelia.tls=true"
+      - "traefik.http.routers.authelia.tls.certresolver=cloudflare"
+      - "traefik.http.routers.authelia.service=authelia"
+      - "traefik.http.services.authelia.loadbalancer.server.port=9091"
+      
+  uptime-kuma:
+    image: louislam/uptime-kuma:1
+    container_name: uptime-kuma
+    restart: unless-stopped
+    mem_limit: 320m
+    cpus: "0.50"
+    dns:
+      - 192.168.178.10
+    volumes:
+      - /opt/server/monitoring/data/uptime-kuma:/app/data
     networks:
       - proxy
     labels:
-       - "traefik.enable=true"
-       - "traefik.docker.network=traefik"
-       - "traefik.http.routers.pgladmin.rule=Host('pgadmin.internal.avataryx.de'^)"
-       - "traefik.http.routers.pgladmin.entrypoints=websecure"
-       - "traefik.http.routers.pgladmin.tls=true"
-       - "traefik.http.routers.pgladmin.tls.certresolver=cloudflare"
-       - "traefik.http.services.pgladmin.loadbalancer.server.port=80"
-#       - "traefik.http.routers.pgladmin.middlewares=authelia@docker"
+      - traefik.enable=true
+      - traefik.docker.network=server
+      - traefik.http.routers.kuma-in.rule=Host(`kuma.internal.avataryx.de`)
+      - traefik.http.routers.kuma-in.entrypoints=websecure
+      - traefik.http.routers.kuma-in.tls=true
+      - traefik.http.routers.kuma-in.tls.certresolver=cloudflare
+      - traefik.http.routers.kuma-in.service=kuma
+      - traefik.http.services.kuma.loadbalancer.server.port=3001
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    restart: unless-stopped
+    mem_limit: 256m
+    cpus: "0.50"
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=30d
+      - --web.enable-lifecycle
+    volumes:
+      - /opt/server/monitoring/config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - /opt/server/monitoring/data/prometheus:/prometheus
+    networks:
+      - proxy
+      - backend
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=server
+      - traefik.http.routers.prometheus-in.rule=Host(`prometheus.internal.avataryx.de`)
+      - traefik.http.routers.prometheus-in.entrypoints=websecure
+      - traefik.http.routers.prometheus-in.tls=true
+      - traefik.http.routers.prometheus-in.tls.certresolver=cloudflare
+      - traefik.http.routers.prometheus-in.service=prometheus
+      - traefik.http.services.prometheus.loadbalancer.server.port=9090
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    restart: unless-stopped
+    mem_limit: 384m
+    cpus: "0.50"
+    environment:
+      - GF_SERVER_ROOT_URL=https://grafana.internal.avataryx.de
+      - GF_SECURITY_ADMIN_USER=${GF_SECURITY_USER}
+      - GF_SECURITY_ADMIN_PASSWORD=${GF_SECURITY_ADMIN_PASSWORD}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - /opt/server/monitoring/data/grafana:/var/lib/grafana
+    networks:
+      - proxy
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=server
+      - traefik.http.routers.grafana-in.rule=Host(`grafana.internal.avataryx.de`)
+      - traefik.http.routers.grafana-in.entrypoints=websecure
+      - traefik.http.routers.grafana-in.tls=true
+      - traefik.http.routers.grafana-in.tls.certresolver=cloudflare
+      - traefik.http.routers.grafana-in.service=grafana
+      - traefik.http.services.grafana.loadbalancer.server.port=3000
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: node-exporter
+    restart: unless-stopped
+    mem_limit: 64m
+    cpus: "0.10"
+    command:
+      - --path.rootfs=/host
+    pid: host
+    volumes:
+      - /:/host:ro,rslave
+    networks:
+      - proxy
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: cadvisor
+    restart: unless-stopped
+    mem_limit: 128m
+    cpus: "0.50"
+    privileged: true
+    devices:
+      - /dev/kmsg:/dev/kmsg
+    command:
+      - --housekeeping_interval=10s
+      - --disable_metrics=disk,diskIO,hugetlb,percpu,sched,tcp,udp,process
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker:/var/lib/docker:ro
+      - /dev/disk:/dev/disk:ro
+    networks:
+      - proxy
+      
+  dashboard:
+    build: .
+    container_name: dashboard
+    restart: unless-stopped
+    mem_limit: 256m
+    cpus: "0.50"
+    env_file:
+      - /opt/server/.env
+    volumes:
+      - /:/host
+      - type: bind
+        source: /mnt/nas-backup
+        target: /mnt/nas-backup
+        bind:
+          propagation: shared
+    networks:
+      - proxy
+      - backend
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=server"
+      - "traefik.http.routers.dashboard-in.rule=Host(`dashboard.internal.avataryx.de`)"
+      - "traefik.http.routers.dashboard-in.entrypoints=websecure"
+      - "traefik.http.routers.dashboard-in.tls=true"
+      - "traefik.http.routers.dashboard-in.tls.certresolver=cloudflare"
+      - "traefik.http.routers.dashboard-in.service=dashboard"
+      - "traefik.http.routers.dashboard.rule=Host(`dashboard.avataryx.de`)"
+      - "traefik.http.routers.dashboard.entrypoints=websecure"
+      - "traefik.http.routers.dashboard.tls=true"
+      - "traefik.http.routers.dashboard.tls.certresolver=cloudflare"
+      - "traefik.http.routers.dashboard.service=dashboard"
+      - "traefik.http.routers.dashboard.middlewares=authelia@file"
+      - "traefik.http.services.dashboard.loadbalancer.server.port=5000"
 
 networks:
   proxy:

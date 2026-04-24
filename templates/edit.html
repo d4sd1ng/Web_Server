@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Bearbeiten der Datenbank {{ database }}</title>
+</head>
+<body>
+    <h1>Bearbeiten der Datenbank: {{ database }}</h1>
+    <ul>
+        {% for table in tables %}
+        <li>{{ table[0] }}</li>
+        {% endfor %}
+    </ul>
+    <form action="{{ url_for('create_table', database=database) }}" method="post">
+        <label for="tablename">Neue Tabelle erstellen:</label>
+        <input type="text" id="tablename" name="tablename">
+        <label for="columns">Spalten (z.B. id SERIAL PRIMARY KEY, name VARCHAR(100)):</label>
+        <input type="text" id="columns" name="columns">
+        <button type="submit">Erstellen</button>
+    </form>
+    <a href="{{ url_for('databases') }}">Zurück zur Übersicht</a>
+</body>
+</html>
