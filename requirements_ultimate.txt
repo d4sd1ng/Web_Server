@@ -1,0 +1,46 @@
+# Ultimate Trading System Requirements - 43 Agents with 15 ML Algorithms
+# Complete dependencies for maximum ML data collection
+
+# Core Data Processing
+pandas>=1.5.0
+numpy>=1.21.0
+python-dotenv>=0.19.0
+pytz>=2022.1
+
+# Market Data & APIs
+ccxt>=2.0.0
+requests>=2.28.0
+
+# Technical Analysis
+ta>=0.10.2
+
+# Machine Learning - Complete Ensemble (15 Algorithms)
+scikit-learn>=1.1.0
+xgboost>=1.6.0
+lightgbm>=3.3.0
+catboost>=1.1.0
+
+# Neural Networks & Deep Learning
+tensorflow>=2.10.0
+torch>=1.12.0
+
+# Additional ML Libraries
+joblib>=1.2.0
+
+# Statistical Analysis
+scipy>=1.9.0
+
+# Performance & Optimization
+optuna>=3.0.0
+
+# Utilities & Tools
+tqdm>=4.64.0
+
+# Async & Concurrency
+aiohttp>=3.8.0
+
+# Memory Optimization
+psutil>=5.9.0
+
+# Configuration Files
+pydantic>=1.10.0
