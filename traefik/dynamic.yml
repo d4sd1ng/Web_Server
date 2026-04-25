@@ -1,0 +1,39 @@
+http:
+  routers:
+    adguard:
+      rule: "Host(`adguard.internal.avataryx.de`)"
+      entryPoints:
+        - websecure
+      service: adguard-svc
+      middlewares:
+        - no-xframe
+      tls:
+        certResolver: cloudflare
+        domains:
+          - main: "internal.avataryx.de"
+            sans:
+              - "*.internal.avataryx.de"
+
+  middlewares:
+    authelia:
+      forwardAuth:
+        address: "http://authelia:9091/api/authz/forward-auth"
+        trustForwardHeader: true
+        authResponseHeaders:
+          - "Remote-User"
+          - "Remote-Groups"
+          - "Remote-Name"
+          - "Remote-Email"
+        maxResponseBodySize: 1048576
+
+    no-xframe:
+      headers:
+        customResponseHeaders:
+          X-Frame-Options: ""
+          Content-Security-Policy: ""
+
+  services:
+    adguard-svc:
+      loadBalancer:
+        servers:
+          - url: "http://192.168.178.10:8081"

@@ -40,6 +40,7 @@ services:
       - traefik.http.routers.traefik-in.entrypoints=websecure
       - traefik.http.routers.traefik-in.tls=true
       - traefik.http.routers.traefik-in.tls.certresolver=cloudflare
+      - traefik.http.routers.traefik-in.middlewares=no-xframe@file
       - traefik.http.routers.traefik-in.service=api@internal
 
       - traefik.http.routers.traefik.rule=Host(`${TRAEFIK_HOST}`)
@@ -95,6 +96,7 @@ services:
       - "traefik.http.routers.vaultwarden-in.entrypoints=websecure"
       - "traefik.http.routers.vaultwarden-in.tls=true"
       - "traefik.http.routers.vaultwarden-in.tls.certresolver=cloudflare"
+      - "traefik.http.routers.vaultwarden-in.middlewares=no-xframe@file"
       - "traefik.http.routers.vaultwarden-in.service=vaultwarden"
       - "traefik.http.routers.vaultwarden.rule=Host(`vaultwarden.avataryx.de`)"
       - "traefik.http.routers.vaultwarden.entrypoints=websecure"
@@ -123,6 +125,7 @@ services:
       - "traefik.http.routers.portainer-in.entrypoints=websecure"
       - "traefik.http.routers.portainer-in.tls=true"
       - "traefik.http.routers.portainer-in.tls.certresolver=cloudflare"
+      - "traefik.http.routers.portainer-in.middlewares=no-xframe@file"
       - "traefik.http.routers.portainer-in.service=portainer"
       - "traefik.http.routers.portainer.rule=Host(`portainer.avataryx.de`)"
       - "traefik.http.routers.portainer.entrypoints=websecure"
@@ -151,6 +154,7 @@ services:
       - "traefik.http.routers.homer-in.entrypoints=websecure"
       - "traefik.http.routers.homer-in.tls=true"
       - "traefik.http.routers.homer-in.tls.certresolver=cloudflare"
+      - "traefik.http.routers.homer-in.middlewares=no-xframe@file"
       - "traefik.http.routers.homer-in.service=homer"
       - "traefik.http.routers.homer.rule=Host(`homer.avataryx.de`)"
       - "traefik.http.routers.homer.entrypoints=websecure"
@@ -219,6 +223,7 @@ services:
       - "traefik.http.routers.pgadmin-in.entrypoints=websecure"
       - "traefik.http.routers.pgadmin-in.tls=true"
       - "traefik.http.routers.pgadmin-in.tls.certresolver=cloudflare"
+      - "traefik.http.routers.pgadmin-in.middlewares=no-xframe@file"
       - "traefik.http.routers.pgadmin-in.service=pgadmin"
       - "traefik.http.routers.pgadmin.rule=Host(`pgadmin.avataryx.de`)"
       - "traefik.http.routers.pgadmin.entrypoints=websecure"
@@ -287,6 +292,7 @@ services:
       - traefik.http.routers.kuma-in.entrypoints=websecure
       - traefik.http.routers.kuma-in.tls=true
       - traefik.http.routers.kuma-in.tls.certresolver=cloudflare
+      - traefik.http.routers.kuma-in.middlewares=no-xframe@file
       - traefik.http.routers.kuma-in.service=kuma
       - traefik.http.services.kuma.loadbalancer.server.port=3001
 
@@ -339,6 +345,7 @@ services:
       - traefik.http.routers.grafana-in.entrypoints=websecure
       - traefik.http.routers.grafana-in.tls=true
       - traefik.http.routers.grafana-in.tls.certresolver=cloudflare
+      - traefik.http.routers.grafana-in.middlewares=no-xframe@file
       - traefik.http.routers.grafana-in.service=grafana
       - traefik.http.services.grafana.loadbalancer.server.port=3000
 
@@ -387,11 +394,6 @@ services:
       - /opt/server/.env
     volumes:
       - /:/host
-      - type: bind
-        source: /mnt/nas-backup
-        target: /mnt/nas-backup
-        bind:
-          propagation: shared
     networks:
       - proxy
       - backend
@@ -402,6 +404,8 @@ services:
       - "traefik.http.routers.dashboard-in.entrypoints=websecure"
       - "traefik.http.routers.dashboard-in.tls=true"
       - "traefik.http.routers.dashboard-in.tls.certresolver=cloudflare"
+      - "traefik.http.routers.dashboard-in.tls.domains[0].main=*.internal.avataryx.de"
+      - "traefik.http.routers.dashboard-in.tls.domains[0].sans=internal.avataryx.de"
       - "traefik.http.routers.dashboard-in.service=dashboard"
       - "traefik.http.routers.dashboard.rule=Host(`dashboard.avataryx.de`)"
       - "traefik.http.routers.dashboard.entrypoints=websecure"

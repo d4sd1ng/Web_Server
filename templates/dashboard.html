@@ -633,8 +633,16 @@
             <div id="traefik-tab" class="content" style="display: none; padding: 0; margin: 0;">
                 <iframe src="https://traefik.internal.avataryx.de" style="width:100%;height:calc(100vh - 8px);border:none;display:block;" title="Traefik"></iframe>
             </div>
-            <div id="vaultwarden-tab" class="content" style="display: none; padding: 0; margin: 0;">
-                <iframe src="https://vaultwarden.internal.avataryx.de" style="width:100%;height:calc(100vh - 8px);border:none;display:block;" title="Vaultwarden"></iframe>
+            <div id="vaultwarden-tab" class="content" style="display: none;">
+                <div class="d-flex flex-column align-items-center justify-content-center" style="height: calc(100vh - 120px);">
+                    <div class="card text-center p-5" style="max-width: 480px; width: 100%;">
+                        <h2 class="mb-3">Vaultwarden</h2>
+                        <p class="text-muted mb-4">Passwort-Manager können nicht als iframe eingebettet werden — Browser blockieren Autofill, Extensions und 2FA in diesem Kontext.</p>
+                        <a href="https://vaultwarden.internal.avataryx.de" target="_blank" rel="noopener" class="btn btn-primary btn-lg">
+                            In neuem Tab öffnen
+                        </a>
+                    </div>
+                </div>
             </div>
             <div id="nextcloud-tab" class="content" style="display: none; padding: 0; margin: 0;">
                 <iframe src="https://cloud.internal.avataryx.de" style="width:100%;height:calc(100vh - 8px);border:none;display:block;" title="Nextcloud"></iframe>
@@ -648,7 +656,7 @@
         const contents = document.querySelectorAll('.content');
         const header = document.querySelector('header');
         const mainEl = document.querySelector('main');
-        const IFRAME_TABS = new Set(['adguard','portainer','homer-tab','kuma-tab','traefik-tab','vaultwarden-tab','nextcloud-tab']);
+        const IFRAME_TABS = new Set(['adguard','portainer','homer-tab','kuma-tab','traefik-tab','nextcloud-tab']);
 
         console.log('Debug: Page Loaded.'); // Debug: Initiale Seite geladen
 
